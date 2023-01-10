@@ -1,4 +1,4 @@
-package org.processmining.stochasticlabelleddatapetrinet;
+package weights;
 
 import java.io.IOException;
 import java.io.InputStream;

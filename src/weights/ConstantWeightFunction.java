@@ -1,4 +1,4 @@
-package org.processmining.stochasticlabelleddatapetrinet;
+package weights;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 

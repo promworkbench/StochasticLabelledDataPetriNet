@@ -7,6 +7,9 @@ import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
+import weights.ConstantWeightFunction;
+import weights.WeightFunction;
+
 public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {
 
