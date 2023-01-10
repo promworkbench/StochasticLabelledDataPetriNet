@@ -5,10 +5,9 @@ import java.util.List;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
+import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
+import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
-
-import weights.ConstantWeightFunction;
-import weights.WeightFunction;
 
 public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {

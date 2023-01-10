@@ -1,8 +1,6 @@
-package org.processmining.stochasticlabelleddatapetrinet;
+package org.processmining.stochasticlabelleddatapetrinet.weights;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
-
-import weights.WeightFunction;
 
 public class LinearRegressionBasedWeightFunction implements WeightFunction {
 	
