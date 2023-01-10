@@ -19,19 +19,25 @@ public class DataStateLogAdapterImpl implements DataStateLogAdapter {
 	}
 
 	public DataState fromEvent(XEvent event) {				
-		return fromAttributable(event);		
+		return fromAttributable(semantics.newDataState(), event);		
 	}
 
 	public DataState fromTrace(XTrace trace) {
-		return fromAttributable(trace);
+		return fromAttributable(semantics.newDataState(), trace);
+	}
+
+	public DataState fromEvent(XEvent event, DataState ds) {
+		return fromAttributable(ds, event);
+	}
+
+	public DataState fromTrace(XTrace trace, DataState ds) {
+		return fromAttributable(ds, trace);
 	}
 	
-	private DataState fromAttributable(XAttributable attr) {
+	private DataState fromAttributable(DataState ds, XAttributable attr) {
 						
 		XAttributeMap attributes = attr.getAttributes();
-		
-		DataState ds = semantics.newDataState();
-		
+	
 		for (int i = 0; i < semantics.getNumberOfVariables(); i++) {
 			String varLabel = semantics.getVariableLabel(i);
 

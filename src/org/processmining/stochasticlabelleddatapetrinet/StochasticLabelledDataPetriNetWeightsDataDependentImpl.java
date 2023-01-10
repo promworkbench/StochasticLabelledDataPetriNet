@@ -14,7 +14,22 @@ public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends Stoc
 
 	private List<WeightFunction> transitionWeights = new ArrayList<>();
 	
+	
 	/**
+	 * Copy from existing SLDPN
+	 * 
+	 * @param sldpn
+	 */
+	public StochasticLabelledDataPetriNetWeightsDataDependentImpl(StochasticLabelledDataPetriNet sldpn) {
+		super(sldpn);
+		for (int i = 0; i < getNumberOfTransitions(); i++) {
+			transitionWeights.add(new ConstantWeightFunction());
+		}
+	}
+
+	/**
+	 * 
+	 * Copy from existing SLPN with added data perspective
 	 * 
 	 * @param slpn
 	 * @param variableLabels
