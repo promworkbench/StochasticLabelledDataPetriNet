@@ -2,6 +2,8 @@ package org.processmining.stochasticlabelleddatapetrinet.probability;
 
 import java.util.Arrays;
 
+import org.processmining.stochasticlabelledpetrinets.probability.ABState;
+
 public class ABDataState<B, BD> extends ABState<B> {
 
 	private final BD dataStateB;
