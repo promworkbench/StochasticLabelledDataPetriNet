@@ -2,22 +2,25 @@ package org.processmining.stochasticlabelleddatapetrinet.probability;
 
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.model.XTrace;
-import org.jbpt.pm.data.DataState;
 import org.processmining.plugins.InductiveMiner.Pair;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
+import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
+import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapterImpl;
 
 public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer, DataState> {
 
 	private final XTrace trace;
 	private final XEventClassifier classifier;
+	private final DataStateLogAdapterImpl dataLogAdapter;
 
-	public FollowerSemanticsDataImpl(XTrace trace, XEventClassifier classifier) {
+	public FollowerSemanticsDataImpl(XTrace trace, XEventClassifier classifier, StochasticLabelledDataPetriNetSemantics semantics) {
 		this.trace = trace;
 		this.classifier = classifier;
+		this.dataLogAdapter = new DataStateLogAdapterImpl(semantics);
 	}
 
 	public Pair<Integer, DataState> getInitialState() {
-		DataState dataState = new DataStateFactoryImpl().newDataState();
-		Log2DataState.traceData2DataState(dataState, trace);
+		DataState dataState = dataLogAdapter.fromTrace(trace);
 		return Pair.of(0, dataState);
 	}
 
@@ -35,9 +38,7 @@ public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer,
 	}
 
 	public DataState getNextDataState(Integer stateB, DataState dataStateB, int transition) {
-		DataState result = dataStateB.deepCopy();
-		Log2DataState.eventData2DataState(result, trace.get(stateB));
-		return result;
+		return dataLogAdapter.fromEvent(trace.get(stateB));
 	}
 
 }

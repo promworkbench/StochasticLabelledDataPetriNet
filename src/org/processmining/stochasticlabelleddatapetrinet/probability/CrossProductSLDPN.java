@@ -3,8 +3,9 @@ package org.processmining.stochasticlabelleddatapetrinet.probability;
 import java.util.ArrayDeque;
 import java.util.BitSet;
 
-import org.jbpt.pm.data.DataState;
 import org.processmining.framework.plugin.ProMCanceller;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
+import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelledpetrinets.probability.CrossProductResult;
 
 import gnu.trove.list.TDoubleList;
@@ -39,8 +40,8 @@ public class CrossProductSLDPN {
 			B initialBState = systemB.getInitialState().getA();
 			DataState initialBDataState = systemB.getInitialState().getB();
 
-			semanticsA.setInitialState();
-			semanticsA.setDataState(initialBDataState);
+			semanticsA.setInitialState(initialBDataState);
+			//semanticsA.setDataState(); FM, can be done above
 
 			ABDataState<B, DataState> state = new ABDataState<B, DataState>(z.semanticsA.getState(), initialBState,
 					initialBDataState);
