@@ -5,18 +5,19 @@ import org.deckfour.xes.model.XTrace;
 import org.processmining.plugins.InductiveMiner.Pair;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
-import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapterImpl;
+import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
 
 public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer, DataState> {
 
 	private final XTrace trace;
 	private final XEventClassifier classifier;
-	private final DataStateLogAdapterImpl dataLogAdapter;
+	private final DataStateLogAdapter dataLogAdapter;
 
-	public FollowerSemanticsDataImpl(XTrace trace, XEventClassifier classifier, StochasticLabelledDataPetriNetSemantics semantics) {
+	public FollowerSemanticsDataImpl(XTrace trace, XEventClassifier classifier,
+			StochasticLabelledDataPetriNetSemantics semantics, DataStateLogAdapter logAdapter) {
 		this.trace = trace;
 		this.classifier = classifier;
-		this.dataLogAdapter = new DataStateLogAdapterImpl(semantics);
+		this.dataLogAdapter = logAdapter;
 	}
 
 	public Pair<Integer, DataState> getInitialState() {
