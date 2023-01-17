@@ -18,5 +18,5 @@ public interface FollowerSemanticsData<B, BD> {
 
 	public abstract boolean isFinalState(B state);
 
-	public abstract BD getNextDataState(B stateB, BD dataStateB, int transition);
+	public abstract BD getDataStateAfter(B state);
 }

@@ -87,33 +87,36 @@ public class CrossProductSLDPN {
 				for (int transition = enabledTransitions.nextSetBit(0); transition >= 0; transition = enabledTransitions
 						.nextSetBit(transition + 1)) {
 
-					//get the next data state
-					DataState newDataStateB = systemB.getNextDataState(stateAB.getStateB(), stateAB.getDataStateB(),
-							transition);
-
 					z.semanticsA.setState(stateAB.getStateA());
-					z.semanticsA.executeTransition(transition, newDataStateB);
 
 					byte[] newStateA = z.semanticsA.getState();
 					if (z.semanticsA.isTransitionSilent(transition)) {
-						//silent transition; only A takes a step
+						//silent transition; only A takes a step; no data step
 						B newStateB = stateAB.getStateB();
+						DataState newDataStateB = stateAB.getDataStateB();
+
+						z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
 
 						processNewState(z, y, totalWeight, transition, newStateA, newStateB, newDataStateB);
 					} else {
 						//labelled transition; both A and B need to take steps
 						if (systemB.isFinalState(stateAB.getStateB())) {
 							//B cannot take a further step, so this is a dead end
+							z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
 							y.outgoingStates.add(deadStateA);
 							y.outgoingStateProbabilities
 									.add(z.semanticsA.getTransitionWeight(transition) / totalWeight);
 						} else {
 							B newStateB = systemB.takeStep(stateAB.getStateB(),
 									z.semanticsA.getTransitionLabel(transition));
+							DataState newDataStateB = systemB.getDataStateAfter(newStateB);
 							if (newStateB != null) {
+								z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
+
 								processNewState(z, y, totalWeight, transition, newStateA, newStateB, newDataStateB);
 							} else {
 								//dead state
+								z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
 								y.outgoingStates.add(deadStateA);
 								y.outgoingStateProbabilities
 										.add(z.semanticsA.getTransitionWeight(transition) / totalWeight);

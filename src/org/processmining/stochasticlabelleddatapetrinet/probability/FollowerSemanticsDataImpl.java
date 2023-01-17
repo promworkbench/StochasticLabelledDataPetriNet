@@ -1,33 +1,27 @@
 package org.processmining.stochasticlabelleddatapetrinet.probability;
 
-import org.deckfour.xes.classification.XEventClassifier;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.plugins.InductiveMiner.Pair;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
-import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
 
 public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer, DataState> {
 
-	private final XTrace trace;
-	private final XEventClassifier classifier;
-	private final DataStateLogAdapter dataLogAdapter;
+	private final String[] activityTrace;
+	private final DataState[] dataTrace;
 
-	public FollowerSemanticsDataImpl(XTrace trace, XEventClassifier classifier,
-			StochasticLabelledDataPetriNetSemantics semantics, DataStateLogAdapter logAdapter) {
-		this.trace = trace;
-		this.classifier = classifier;
-		this.dataLogAdapter = logAdapter;
+	public FollowerSemanticsDataImpl(String[] activityTrace, DataState[] dataTrace) {
+		assert dataTrace.length > 0; //there is always at least one data state: the initial one
+
+		this.activityTrace = activityTrace;
+		this.dataTrace = dataTrace;
 	}
 
 	public Pair<Integer, DataState> getInitialState() {
-		DataState dataState = dataLogAdapter.fromTrace(trace);
-		return Pair.of(0, dataState);
+		return Pair.of(0, dataTrace[0]);
 	}
 
 	public Integer takeStep(Integer state, String label) {
 		state++;
-		if (classifier.getClassIdentity(trace.get(state)).equals(label)) {
+		if (activityTrace[state].equals(label)) {
 			return state;
 		} else {
 			return null;
@@ -35,11 +29,15 @@ public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer,
 	}
 
 	public boolean isFinalState(Integer state) {
-		return state < trace.size();
+		return state < activityTrace.length;
 	}
 
-	public DataState getNextDataState(Integer stateB, DataState dataStateB, int transition) {
-		return dataLogAdapter.fromEvent(trace.get(stateB));
+	public DataState getDataStateAfter(Integer state) {
+		if (state + 1 < dataTrace.length) {
+			return dataTrace[state + 1];
+		} else {
+			return dataTrace[dataTrace.length - 1];
+		}
 	}
 
 }
