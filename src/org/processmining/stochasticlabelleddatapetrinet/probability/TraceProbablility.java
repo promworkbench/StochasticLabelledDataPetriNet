@@ -18,7 +18,34 @@ public class TraceProbablility {
 			XEventClassifier classifier, ProMCanceller canceller) throws LpSolveException {
 		DataStateLogAdapter logAdapter = new DataStateLogAdapterImpl(semantics);
 
+		String[] activitySequence = getActivitySequence(trace, classifier);
+		DataState[] dataSequence = getDataSequence(trace, logAdapter);
+
+		return getTraceProbability(semantics, activitySequence, dataSequence, canceller);
+	}
+
+	public static double getTraceProbability(StochasticLabelledDataPetriNetSemantics semantics,
+			String[] activitySequence, DataState[] dataSequence, ProMCanceller canceller) throws LpSolveException {
+
+		CrossProductResultSolver result = new CrossProductResultSolver();
+		FollowerSemanticsDataImpl systemB = new FollowerSemanticsDataImpl(activitySequence, dataSequence);
+		CrossProductSLDPN.traverse(semantics, systemB, result, canceller);
+
+		return result.solve(canceller);
+	}
+
+	public static String[] getActivitySequence(XTrace trace, XEventClassifier classifier) {
 		String[] activityTrace = new String[trace.size()];
+		for (int i = 0; i < trace.size(); i++) {
+			XEvent event = trace.get(i);
+
+			activityTrace[i] = classifier.getClassIdentity(event);
+
+		}
+		return activityTrace;
+	}
+
+	public static DataState[] getDataSequence(XTrace trace, DataStateLogAdapter logAdapter) {
 		DataState[] dataTrace = new DataState[trace.size()];
 
 		DataState data = logAdapter.fromTrace(trace);
@@ -26,24 +53,11 @@ public class TraceProbablility {
 		for (int i = 0; i < trace.size(); i++) {
 			XEvent event = trace.get(i);
 
-			activityTrace[i] = classifier.getClassIdentity(event);
 			dataTrace[i] = data;
 
 			data = data.deepCopy();
 			data = logAdapter.fromEvent(event, data);
 		}
-
-		return getTraceProbability(semantics, activityTrace, dataTrace, canceller);
+		return dataTrace;
 	}
-
-	public static double getTraceProbability(StochasticLabelledDataPetriNetSemantics semantics, String[] activityTrace,
-			DataState[] dataTrace, ProMCanceller canceller) throws LpSolveException {
-
-		CrossProductResultSolver result = new CrossProductResultSolver();
-		FollowerSemanticsDataImpl systemB = new FollowerSemanticsDataImpl(activityTrace, dataTrace);
-		CrossProductSLDPN.traverse(semantics, systemB, result, canceller);
-
-		return result.solve(canceller);
-	}
-
 }
