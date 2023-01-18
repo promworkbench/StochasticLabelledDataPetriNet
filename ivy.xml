@@ -20,7 +20,9 @@
     	<dependency org="prom" name="DataExpression" rev="latest" changing="true" transitive="true" />
     	<dependency org="prom" name="PetriNets" rev="latest" changing="true" transitive="true" />
     	<dependency org="prom" name="GraphViz" rev="latest" changing="true" transitive="true" /> 	
-    	<dependency org="prom" name="StochasticLabelledPetriNets" rev="latest" changing="true" transitive="true" />    	    	
+    	<dependency org="prom" name="StochasticLabelledPetriNets" rev="latest" changing="true" transitive="true" />
+    	<dependency org="prom" name="Weka" rev="latest" changing="true" transitive="true" />
+    	<dependency org="prom" name="XESAlignmentExtension" rev="latest" changing="true" transitive="true" />
     	<!-- Third party libraries. These may span multiple lines. -->
     	<!-- Please uncomment the second line in the resolve target in your build.xml file
     	     if you have any third party libraries. -->
