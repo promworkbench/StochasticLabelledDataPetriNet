@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.processmining.datapetrinets.DataPetriNet.PetrinetWithMarkings;
 import org.processmining.log.utils.XUtils;
@@ -30,6 +31,16 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 
 public class ObservationInstanceBuilderTest {
+	
+	@BeforeClass
+	public static void init() throws Throwable {
+		try {
+			IntegrationTestUtil.initializeProMWithRequiredPackages("LpSolve");
+		} catch (Throwable e) {
+			// Ignore we only load LpSolve
+		}
+	}
+	
 	
 	@Test
 	public void testBuildFromFittingLog() throws ControlFlowAlignmentException, DataAlignmentException {
