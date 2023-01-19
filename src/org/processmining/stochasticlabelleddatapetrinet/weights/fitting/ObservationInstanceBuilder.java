@@ -15,14 +15,11 @@ import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeMap;
 import org.processmining.datapetrinets.expression.GuardExpression;
 import org.processmining.log.utils.XUtils;
-import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
 import org.processmining.xesalignmentextension.XAlignmentExtension.MoveType;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignmentMove;
-import org.processmining.xesalignmentextension.XDataAlignmentExtension;
-import org.processmining.xesalignmentextension.XDataAlignmentExtension.XDataAlignmentExtensionException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultiset;
@@ -107,22 +104,11 @@ public class ObservationInstanceBuilder {
 		private ProjectedEventForDiscovery(XAlignmentMove move, Set<String> writtenAttributes, Integer transition) {
 			this.transition = transition;
 			Builder<String, Object> attributeBuilder = ImmutableMap.builder();
-			XDataAlignmentExtension dae = XDataAlignmentExtension.instance();
 			XAttributeMap eventAttributes = move.getEvent().getAttributes();
 			for (String key : writtenAttributes) {
 				XAttribute attribute = eventAttributes.get(key);
 				if (attribute != null) {
-					if (isTreatMissingValuesAsNA()) {
-						try {
-							if (!dae.isMissingAttribute(attribute)) { // we treat missing values as N/A for the discovery
-								attributeBuilder.put(key, XUtils.getAttributeValue(attribute));
-							} // else do not add results in N/A in discovery
-						} catch (XDataAlignmentExtensionException e) {
-							throw new RuntimeException("Invalid alignment format!", e);
-						}
-					} else {
-						attributeBuilder.put(key, XUtils.getAttributeValue(attribute));
-					}
+					attributeBuilder.put(key, XUtils.getAttributeValue(attribute));
 				} else {
 					if (isTreatMissingValuesAsNA()) {
 						// Add will result in discovery obtaining a NULL, which is used as special value for missing!
@@ -153,34 +139,31 @@ public class ObservationInstanceBuilder {
 	private final StochasticLabelledDataPetriNet net;
 	private final Iterable<XAlignment> alignedLog;
 
-	private final Map<String, Class<?>> attributesForDiscoveryWithPreparedNames;
+	private final Map<String, Class<?>> attributesForDiscovery;
 	private final Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypeMap;
 
 	private boolean isTreatMissingValuesAsNA = true;
 	
 	private final Map<String, Object> initialValues;
-	private final Map<String, Set<String>> literalValues;
+	// private final Map<String, Set<String>> literalValues;
 
-	public ObservationInstanceBuilder(StochasticLabelledDataPetriNet net, Iterable<XAlignment> alignedLog,
-			Map<String, Object> initialValues, Map<String, Class<?>> attributesForDiscovery,
-			Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypes, Map<String, Set<String>> literalValues) {
+	public ObservationInstanceBuilder(StochasticLabelledDataPetriNet net, 
+			Iterable<XAlignment> alignedLog,
+			Map<String, Object> initialValues, 
+			Map<String, Class<?>> attributesForDiscovery,
+			Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypes) {
 		this.net = net;
 		this.alignedLog = alignedLog;
-		this.attributesForDiscoveryWithPreparedNames = transformToWekaNames(attributesForDiscovery);
+		this.attributesForDiscovery = transformToWekaNames(attributesForDiscovery);
 		this.initialValues = initialValues;
 		this.attributeTypeMap = attributeTypes;
-		this.literalValues = literalValues;
 	}	
 	
-	public ProjectedLog buildProjectedLog(
-			SetMultimap<Integer, String> attributesWritten, 
-			Set<Place> consideredPlaces,
-			Set<String> consideredAttributes) {
+	public ProjectedLog buildProjectedLog(SetMultimap<Integer, String> attributesWritten, Set<String> consideredAttributes) {
 
 		Map<String, Object> initialValuesForConsideredAttributes = filterInitialAttributeByConsidered(consideredAttributes);
 		Map<String, Integer> transitionsLocalId = Map.of(); // TODO fill or get as params
-		
-		
+					
 		ProjectedLog projectedLog = new ProjectedLogForDiscovery(
 				Iterables.transform(alignedLog, new Function<XAlignment, ProjectedTrace>() {
 
