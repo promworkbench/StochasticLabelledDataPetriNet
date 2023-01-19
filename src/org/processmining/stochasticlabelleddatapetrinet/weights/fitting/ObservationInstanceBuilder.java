@@ -71,7 +71,7 @@ public class ObservationInstanceBuilder {
 			this.eventsForDiscovery = new ArrayList<ProjectedEvent>(alignment.size());
 			for (XAlignmentMove move : alignment) {
 				MoveType type = move.getType();
-				if (type != MoveType.LOG) {
+				if (type != MoveType.LOG) { //TODO what about model moves?
 					Integer transition = transitionsLocalId.get(move.getActivityId());
 					ProjectedEventForDiscovery eventForDiscovery = new ProjectedEventForDiscovery(move,
 							writtenAttributes.get(transition), transition);
@@ -85,11 +85,11 @@ public class ObservationInstanceBuilder {
 		}
 
 		public Object getAttributeValue(String attributeName) {
-			return null;
+			return null; // TODO trace attributes?
 		}
 
 		public Set<String> getAttributes() {
-			return ImmutableSet.of();
+			return ImmutableSet.of(); // TODO trace attributes?
 		}
 
 	}
@@ -159,10 +159,10 @@ public class ObservationInstanceBuilder {
 		this.attributeTypeMap = attributeTypes;
 	}	
 	
-	public ProjectedLog buildProjectedLog(SetMultimap<Integer, String> attributesWritten, Set<String> consideredAttributes) {
+	public ProjectedLog buildProjectedLog(SetMultimap<Integer, String> attributesWritten, 
+			Set<String> consideredAttributes, Map<String, Integer> transitionsLocalId) {
 
 		Map<String, Object> initialValuesForConsideredAttributes = filterInitialAttributeByConsidered(consideredAttributes);
-		Map<String, Integer> transitionsLocalId = Map.of(); // TODO fill or get as params
 					
 		ProjectedLog projectedLog = new ProjectedLogForDiscovery(
 				Iterables.transform(alignedLog, new Function<XAlignment, ProjectedTrace>() {
@@ -176,41 +176,26 @@ public class ObservationInstanceBuilder {
 	}
 	
 	
-	public void buildInstancesMultimap(ProjectedLog projectedLog, Integer[] transitions) {
-		final Map<Object, Multiset<Map<String, Object>>> instances = new HashMap<>();
-		for (Integer clazz : transitions) {
+	public Map<Integer, Multiset<Map<String, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, Map<String, Integer> transitionsLocalId) {
+		
+		final Map<Integer, Multiset<Map<String, Object>>> instances = new HashMap<>();
+		for (Integer clazz : transitionsLocalId.values()) {
 			instances.put(clazz, HashMultiset.<Map<String, Object>>create());
 		}
+		
 		final Map<String, Object> escapedInitialAttributes = getEscapedInitialAttributes(projectedLog);
+		
 		final Map<String, Object> currentAttributeValues = new HashMap<>();
 		for (ProjectedTrace trace : projectedLog) {
 			currentAttributeValues.putAll(escapedInitialAttributes);
-			Object lastActivity = null;
 			for (Iterator<ProjectedEvent> iterator = trace.iterator(); iterator.hasNext();) {
+				
 				ProjectedEvent e = iterator.next();
-//				if (config.isMinePrimeGuards()) {
-//					for (String attributeKey : e.getAttributes()) {
-//						// NULL is used as marker for missing values
-//						Object value = e.getAttributeValue(attributeKey);
-//						String escapedKey = escapeAttributeName(attributeKey).concat("'");
-//						if (value == null) {
-//							currentAttributeValues.put(escapedKey, NULL);
-//						} else {
-//							currentAttributeValues.put(escapedKey, value);
-//						}
-//					}
-//				}
 				
-				//TODO decide when to add the values
+				//TODO add the enabled but not chosen ones
+				instances.get(e.getActivity()).add(ImmutableMap.copyOf(currentAttributeValues));
 				
-				final Object activity = e.getActivity();
-				// only add instance if 
-				// decision point is NULL 
-				// or the class does not directly follow the decision point 
-				// or when the last activity equals the decision point 
-				instances.get(activity).add(ImmutableMap.copyOf(currentAttributeValues));
-				
-				// Update current values					
+				// Update current values with observations
 				for (String attributeKey : e.getAttributes()) {
 					// NULL is used as marker for missing values
 					Object value = e.getAttributeValue(attributeKey);
@@ -221,21 +206,21 @@ public class ObservationInstanceBuilder {
 						currentAttributeValues.put(escapedKey, value);
 					}
 				}
-				lastActivity = activity;
 			}
 			currentAttributeValues.clear();
 		}
 		
+		return instances;
 	}
 	
-	public Instances buildInstances(Map<String, Multiset<Map<String, Object>>> observations) {
+	public Instances buildInstances(Map<Integer, Multiset<Map<String, Object>>> observations) {
 		
 		String name = null; //TODO
 		ArrayList<Attribute> attributeList = new ArrayList<>(); //TODO
 		int capacity = 0; //TODO
 		Instances instances = new Instances(name, attributeList, capacity);	
 	
-		for (Entry<String, Multiset<Map<String, Object>>> classEntry : observations.entrySet()) {
+		for (Entry<Integer, Multiset<Map<String, Object>>> classEntry : observations.entrySet()) {
 			for (com.google.common.collect.Multiset.Entry<Map<String, Object>> instanceEntry : classEntry.getValue()
 					.entrySet()) {
 				Map<String, Object> attributesWithNull = Maps.transformValues(instanceEntry.getElement(),
@@ -264,7 +249,7 @@ public class ObservationInstanceBuilder {
 		return instances;			
 	}
 
-	private Instance createInstance(Map<String, Object> variableAssignment, String target, float weight) {
+	private Instance createInstance(Map<String, Object> variableAssignment, Integer target, float weight) {
 		Instance instance = new DenseInstance(variableAssignment.size());
 //		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
 //			Attribute attr = null;

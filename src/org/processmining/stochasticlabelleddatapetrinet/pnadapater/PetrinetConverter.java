@@ -1,6 +1,8 @@
 package org.processmining.stochasticlabelleddatapetrinet.pnadapater;
 
-import org.processmining.datapetrinets.DataPetriNet.PetrinetWithMarkings;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
@@ -10,14 +12,29 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 
 public class PetrinetConverter {
 	
-	public static PetrinetWithMarkings viewAsPetrinet(StochasticLabelledDataPetriNet sldpn) {
+	public interface PetrinetMarkedWithMappings {
+		
+		Petrinet getNet();
+
+		Marking getInitialMarking();
+
+		Marking[] getFinalMarkings();
+		
+		Map<Integer, String> getTransitionIndexToId();
+
+	}
+
+	public static PetrinetMarkedWithMappings viewAsPetrinet(StochasticLabelledDataPetriNet sldpn) {
+		
 		PetrinetImpl pn = new PetrinetImpl("Converted from " + sldpn.toString());
+		Map<Integer, String> conversionMap = new HashMap<>();
 		
 		Transition[] transitions = new Transition[sldpn.getNumberOfPlaces()];
 		Place[] places = new Place[sldpn.getNumberOfPlaces()];
 		
 		for (int i = 0; i < sldpn.getNumberOfTransitions(); i++) {
 			transitions[i] = pn.addTransition(sldpn.getTransitionLabel(i));
+			conversionMap.put(i, transitions[i].getLocalID().toString());
 		}
 		
 		for (int i = 0; i < sldpn.getNumberOfPlaces(); i++) {
@@ -41,7 +58,7 @@ public class PetrinetConverter {
 		}
 		Marking[] finalMarkings = new Marking[0]; // We don't have that information
 		
-		return new PetrinetWithMarkings() {
+		return new PetrinetMarkedWithMappings() {
 			
 			public Petrinet getNet() {
 				return pn;
@@ -53,6 +70,10 @@ public class PetrinetConverter {
 			
 			public Marking[] getFinalMarkings() {
 				return finalMarkings;
+			}
+
+			public Map<Integer, String> getTransitionIndexToId() {
+				return conversionMap;
 			}
 		};
 	}
