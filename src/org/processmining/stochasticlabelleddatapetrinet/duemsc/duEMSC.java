@@ -12,7 +12,10 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
+import org.processmining.stochasticlabelleddatapetrinet.probability.CrossProductSLDPN;
+import org.processmining.stochasticlabelleddatapetrinet.probability.FollowerSemanticsDataImpl;
 import org.processmining.stochasticlabelleddatapetrinet.probability.TraceProbablility;
+import org.processmining.stochasticlabelledpetrinets.probability.CrossProductResultDot;
 
 import gnu.trove.iterator.TObjectIntIterator;
 import gnu.trove.map.TObjectIntMap;
@@ -27,7 +30,7 @@ public class duEMSC {
 		MathContext mc = new MathContext(10, RoundingMode.HALF_UP);
 
 		//gather data
-		int size = log.size();
+		int logSize = log.size();
 		TObjectIntMap<String[]> activitySequences = getActivitySequences(log, classifier);
 		TObjectIntMap<DataState[]> dataSequences = getDataSequences(log, logAdapter);
 
@@ -39,44 +42,50 @@ public class duEMSC {
 			String[] activitySequence = itAs.key();
 			int activitySequenceWeight = itAs.value();
 			BigDecimal activitySequenceProbabilityLog = BigDecimal.valueOf(activitySequenceWeight)
-					.divide(BigDecimal.valueOf(size), mc);
+					.divide(BigDecimal.valueOf(logSize), mc);
 
-			for (TObjectIntIterator<DataState[]> itDs = dataSequences.iterator(); itDs.hasNext();) {
-				itDs.advance();
+			BigDecimal activitySequenceProbabilityModel = queryModelForTrace(semantics, canceller, mc, activitySequence,
+					dataSequences, logSize);
+			
+			BigDecimal difference = activitySequenceProbabilityLog.subtract(activitySequenceProbabilityModel)
+					.max(BigDecimal.ZERO);
 
-				DataState[] dataSequence = itDs.key();
-				int dataSequenceWeight = itDs.value();
-				BigDecimal dataSequenceProbabilityLog = BigDecimal.valueOf(dataSequenceWeight)
-						.divide(BigDecimal.valueOf(size), mc);
+			System.out.println("log: " + activitySequenceProbabilityLog + " model: " + activitySequenceProbabilityModel
+					+ " difference: " + difference + " trace " + Arrays.toString(activitySequence));
 
-				//perform a single unit-based comparison
-				sum = sum.add(singleComparison(semantics, canceller, mc, activitySequence,
-						activitySequenceProbabilityLog, dataSequence, dataSequenceProbabilityLog));
-			}
+			sum = sum.add(difference);
 		}
 
 		return BigDecimal.ONE.subtract(sum).doubleValue();
 	}
 
-	private static BigDecimal singleComparison(StochasticLabelledDataPetriNetSemantics semantics,
+	private static BigDecimal queryModelForTrace(StochasticLabelledDataPetriNetSemantics semantics,
 			ProMCanceller canceller, MathContext mc, String[] activitySequence,
-			BigDecimal activitySequenceProbabilityLog, DataState[] dataSequence, BigDecimal dataSequenceProbabilityLog)
-			throws LpSolveException {
+			TObjectIntMap<DataState[]> dataSequences, int logSize) throws LpSolveException {
+		BigDecimal sum = BigDecimal.ZERO;
+		for (TObjectIntIterator<DataState[]> itDs = dataSequences.iterator(); itDs.hasNext();) {
+			itDs.advance();
 
-		//get the log probability
-		BigDecimal probabilityLog = activitySequenceProbabilityLog;
+			DataState[] dataSequence = itDs.key();
+			int dataSequenceWeight = itDs.value();
+			BigDecimal dataSequenceProbabilityLog = BigDecimal.valueOf(dataSequenceWeight)
+					.divide(BigDecimal.valueOf(logSize), mc);
 
-		//get the model probability
-		BigDecimal probabilityModel = BigDecimal
-				.valueOf(TraceProbablility.getTraceProbability(semantics, activitySequence, dataSequence, canceller));
+			//get the model probability
+			BigDecimal probabilityConditionalModel = BigDecimal.valueOf(
+					TraceProbablility.getTraceProbability(semantics, activitySequence, dataSequence, canceller));
 
-		BigDecimal difference = probabilityLog.subtract(probabilityModel).max(BigDecimal.ZERO);
+			sum = sum.add(probabilityConditionalModel.multiply(dataSequenceProbabilityLog));
+		}
+		
+		TObjectIntIterator<DataState[]> it = dataSequences.iterator();
+		it.advance();
+		CrossProductResultDot result2 = new CrossProductResultDot();
+		FollowerSemanticsDataImpl systemB2 = new FollowerSemanticsDataImpl(activitySequence, it.key());
+		CrossProductSLDPN.traverse(semantics, systemB2, result2, canceller);
+		System.out.println(result2.toDot());
 
-		System.out.println(Arrays.toString(activitySequence) + " log: " + probabilityLog + " model: " + probabilityModel
-				+ " weighing: " + dataSequenceProbabilityLog);
-
-		//scale the difference by the likelihood of the data sequence
-		return difference.multiply(dataSequenceProbabilityLog, mc);
+		return sum;
 	}
 
 	public static TObjectIntMap<String[]> getActivitySequences(XLog log, XEventClassifier classifier) {

@@ -28,7 +28,7 @@ public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer,
 	}
 
 	public boolean isFinalState(Integer state) {
-		return state == activityTrace.length - 1;
+		return state == activityTrace.length;
 	}
 
 	public DataState getDataStateAfter(Integer state) {
