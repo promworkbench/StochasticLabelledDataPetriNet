@@ -3,6 +3,7 @@ package org.processmining.stochasticlabelleddatapetrinets;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.processmining.stochasticlabelleddatapetrinet.example.SLDPNExamples;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.SLDPNReplayer;
 
 public class SLDPNSemanticsTest {
@@ -23,6 +24,13 @@ public class SLDPNSemanticsTest {
 	public void testDataWeightReplayWithC() {
 		SLDPNReplayer replayer = new SLDPNReplayer();				
 		assertTrue(replayer.replay(TestUtils.buildDataWeightTestModel(), TestUtils.buildTestLog().get(10)) == 6);
+	}
+	
+	@Test
+	public void testSLDPNExamplesSimple() {
+		SLDPNReplayer replayer = new SLDPNReplayer();				
+		assertTrue(replayer.replay(SLDPNExamples.buildSimpleLinearWeightedChoiceSLDPN(), TestUtils.buildTestLog().get(0)) == 31);
 	}	
+
 
 }

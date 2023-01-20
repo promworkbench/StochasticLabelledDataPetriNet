@@ -2,12 +2,12 @@ package org.processmining.stochasticlabelleddatapetrinet.weights;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
-public class LinearRegressionBasedWeightFunction implements WeightFunction {
+public class LinearWeightFunction implements WeightFunction {
 	
 	private final double[] coefficients;
 	private final double intercept;
 	
-	public LinearRegressionBasedWeightFunction(double intercept, double[] coefficients) {
+	public LinearWeightFunction(double intercept, double[] coefficients) {
 		super();
 		this.coefficients = coefficients;
 		this.intercept = intercept;
