@@ -20,16 +20,15 @@ public class FollowerSemanticsDataImpl implements FollowerSemanticsData<Integer,
 	}
 
 	public Integer takeStep(Integer state, String label) {
-		state++;
 		if (activityTrace[state].equals(label)) {
-			return state;
+			return state+1;
 		} else {
 			return null;
 		}
 	}
 
 	public boolean isFinalState(Integer state) {
-		return state < activityTrace.length;
+		return state == activityTrace.length - 1;
 	}
 
 	public DataState getDataStateAfter(Integer state) {

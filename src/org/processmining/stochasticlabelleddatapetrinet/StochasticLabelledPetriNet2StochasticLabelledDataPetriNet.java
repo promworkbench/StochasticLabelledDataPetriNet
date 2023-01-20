@@ -25,7 +25,7 @@ public class StochasticLabelledPetriNet2StochasticLabelledDataPetriNet {
 			}
 
 			public void setInitialState(DataState initialDataState) {
-
+				semantics.setInitialState();
 			}
 
 			public void setDataState(DataState dataState) {

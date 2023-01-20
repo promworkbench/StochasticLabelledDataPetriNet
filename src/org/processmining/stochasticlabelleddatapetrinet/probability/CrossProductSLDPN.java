@@ -41,7 +41,6 @@ public class CrossProductSLDPN {
 			DataState initialBDataState = systemB.getInitialState().getB();
 
 			semanticsA.setInitialState(initialBDataState);
-			//semanticsA.setDataState(); FM, can be done above
 
 			ABDataState<B, DataState> state = new ABDataState<B, DataState>(z.semanticsA.getState(), initialBState,
 					initialBDataState);
@@ -88,14 +87,15 @@ public class CrossProductSLDPN {
 						.nextSetBit(transition + 1)) {
 
 					z.semanticsA.setState(stateAB.getStateA());
+					z.semanticsA.setDataState(stateAB.getDataStateB());
 
-					byte[] newStateA = z.semanticsA.getState();
 					if (z.semanticsA.isTransitionSilent(transition)) {
 						//silent transition; only A takes a step; no data step
 						B newStateB = stateAB.getStateB();
 						DataState newDataStateB = stateAB.getDataStateB();
 
 						z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
+						byte[] newStateA = z.semanticsA.getState();
 
 						processNewState(z, y, totalWeight, transition, newStateA, newStateB, newDataStateB);
 					} else {
@@ -109,9 +109,10 @@ public class CrossProductSLDPN {
 						} else {
 							B newStateB = systemB.takeStep(stateAB.getStateB(),
 									z.semanticsA.getTransitionLabel(transition));
-							DataState newDataStateB = systemB.getDataStateAfter(newStateB);
 							if (newStateB != null) {
+								DataState newDataStateB = systemB.getDataStateAfter(stateAB.getStateB());
 								z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
+								byte[] newStateA = z.semanticsA.getState();
 
 								processNewState(z, y, totalWeight, transition, newStateA, newStateB, newDataStateB);
 							} else {

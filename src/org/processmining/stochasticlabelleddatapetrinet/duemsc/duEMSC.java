@@ -47,7 +47,7 @@ public class duEMSC {
 				DataState[] dataSequence = itDs.key();
 				int dataSequenceWeight = itDs.value();
 				BigDecimal dataSequenceProbabilityLog = BigDecimal.valueOf(dataSequenceWeight)
-						.divide(BigDecimal.valueOf(size));
+						.divide(BigDecimal.valueOf(size), mc);
 
 				//perform a single unit-based comparison
 				sum = sum.add(singleComparison(semantics, canceller, mc, activitySequence,
@@ -71,6 +71,9 @@ public class duEMSC {
 				.valueOf(TraceProbablility.getTraceProbability(semantics, activitySequence, dataSequence, canceller));
 
 		BigDecimal difference = probabilityLog.subtract(probabilityModel).max(BigDecimal.ZERO);
+
+		System.out.println(Arrays.toString(activitySequence) + " log: " + probabilityLog + " model: " + probabilityModel
+				+ " weighing: " + dataSequenceProbabilityLog);
 
 		//scale the difference by the likelihood of the data sequence
 		return difference.multiply(dataSequenceProbabilityLog, mc);

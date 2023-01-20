@@ -31,6 +31,11 @@ public class TraceProbablility {
 		FollowerSemanticsDataImpl systemB = new FollowerSemanticsDataImpl(activitySequence, dataSequence);
 		CrossProductSLDPN.traverse(semantics, systemB, result, canceller);
 
+		//		CrossProductResultDot result2 = new CrossProductResultDot();
+		//		FollowerSemanticsDataImpl systemB2 = new FollowerSemanticsDataImpl(activitySequence, dataSequence);
+		//		CrossProductSLDPN.traverse(semantics, systemB2, result2, canceller);
+		//		System.out.println(result2.toDot());
+
 		return result.solve(canceller);
 	}
 
