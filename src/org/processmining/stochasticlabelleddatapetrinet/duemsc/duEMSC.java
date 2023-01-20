@@ -12,10 +12,7 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
-import org.processmining.stochasticlabelleddatapetrinet.probability.CrossProductSLDPN;
-import org.processmining.stochasticlabelleddatapetrinet.probability.FollowerSemanticsDataImpl;
 import org.processmining.stochasticlabelleddatapetrinet.probability.TraceProbablility;
-import org.processmining.stochasticlabelledpetrinets.probability.CrossProductResultDot;
 
 import gnu.trove.iterator.TObjectIntIterator;
 import gnu.trove.map.TObjectIntMap;
@@ -50,8 +47,8 @@ public class duEMSC {
 			BigDecimal difference = activitySequenceProbabilityLog.subtract(activitySequenceProbabilityModel)
 					.max(BigDecimal.ZERO);
 
-			System.out.println("log: " + activitySequenceProbabilityLog + " model: " + activitySequenceProbabilityModel
-					+ " difference: " + difference + " trace " + Arrays.toString(activitySequence));
+			//			System.out.println("log: " + activitySequenceProbabilityLog + " model: " + activitySequenceProbabilityModel
+			//					+ " difference: " + difference + " trace " + Arrays.toString(activitySequence));
 
 			sum = sum.add(difference);
 		}
@@ -78,12 +75,12 @@ public class duEMSC {
 			sum = sum.add(probabilityConditionalModel.multiply(dataSequenceProbabilityLog));
 		}
 		
-		TObjectIntIterator<DataState[]> it = dataSequences.iterator();
-		it.advance();
-		CrossProductResultDot result2 = new CrossProductResultDot();
-		FollowerSemanticsDataImpl systemB2 = new FollowerSemanticsDataImpl(activitySequence, it.key());
-		CrossProductSLDPN.traverse(semantics, systemB2, result2, canceller);
-		System.out.println(result2.toDot());
+		//		TObjectIntIterator<DataState[]> it = dataSequences.iterator();
+		//		it.advance();
+		//		CrossProductResultDot result2 = new CrossProductResultDot();
+		//		FollowerSemanticsDataImpl systemB2 = new FollowerSemanticsDataImpl(activitySequence, it.key());
+		//		CrossProductSLDPN.traverse(semantics, systemB2, result2, canceller);
+		//		System.out.println(result2.toDot());
 
 		return sum;
 	}
