@@ -16,7 +16,9 @@ public abstract class StochasticLabelledDataPetriNetSemanticsImpl implements Sto
 
 	private byte[] state;
 	private byte[] cacheState;
+
 	private DataState dataState;
+	private boolean isStrictWriteSemantics;
 	
 	private BitSet cacheTransition;	
 	protected BitSet enabledTransitions;
@@ -77,16 +79,19 @@ public abstract class StochasticLabelledDataPetriNetSemanticsImpl implements Sto
 			}
 		}
 		
-		int[] writeVariables = net.getWriteVariables(transition);
-		for (int i = 0; i < writeVariables.length; i++) {
-			int varIdx = writeVariables[i];
-			if (!dataEffect.contains(varIdx)) {
-				throw new RuntimeException("Cannot execute transition, write variable "+net.getVariableLabel(varIdx)+" is missing in dataEffect!");
-			}
-		}		
 		
-		// Update data state					
-		//TODO check or assert that at least all declared variables are written! (more may be written due to context variables or similar)
+		// Check values
+		if (isStrictWriteSemantics()) {
+			int[] writeVariables = net.getWriteVariables(transition);
+			for (int i = 0; i < writeVariables.length; i++) {
+				int varIdx = writeVariables[i];
+				if (!dataEffect.contains(varIdx)) {
+					throw new RuntimeException("Cannot execute transition, write variable "+net.getVariableLabel(varIdx)+" is missing in dataEffect!");
+				}
+			}
+		}
+		
+		// Update data state
 		dataState.update(dataEffect);	
 	}
 
@@ -252,6 +257,14 @@ public abstract class StochasticLabelledDataPetriNetSemanticsImpl implements Sto
 		result.dataState = dataState.deepCopy();
 
 		return result;
+	}
+
+	public boolean isStrictWriteSemantics() {
+		return isStrictWriteSemantics;
+	}
+
+	public void setStrictWriteSemantics(boolean isStrictWriteSemantics) {
+		this.isStrictWriteSemantics = isStrictWriteSemantics;
 	}
 
 }

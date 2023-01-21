@@ -31,6 +31,7 @@ import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
 public class ObservationInstanceBuilderTest {
@@ -62,7 +63,6 @@ public class ObservationInstanceBuilderTest {
 		XLog alignedLog = new BalancedDataXAlignmentPlugin().alignLog( markedPN.getNet(), log, config);		
 		Iterable<XAlignment> alignIter = XAlignmentExtension.instance().extendLog(alignedLog);
 		
-
 		SetMultimap<Integer, String> variablesWritten = SetMultimapBuilder.hashKeys().hashSetValues().build();
 
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
@@ -72,9 +72,9 @@ public class ObservationInstanceBuilderTest {
 		}
 		Set<String> attributesConsidered = Set.copyOf(variablesWritten.values());
 			
-		Map<String, Integer> transitionsLocalId = new HashMap<>();
+		Map<String, Integer> eventClass2TransitionIdx = new HashMap<>();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
-			transitionsLocalId.put(markedPN.getTransitionIndexToId().get(i), i);
+			eventClass2TransitionIdx.put(markedPN.getTransitionIndexToId().get(i), i);
 		}
 		
 		
@@ -96,17 +96,24 @@ public class ObservationInstanceBuilderTest {
 																			variableTypes);
 		
 		ProjectedLog projectedLog = builder.buildProjectedLog(variablesWritten, 
-				attributesConsidered, transitionsLocalId);
+				attributesConsidered, eventClass2TransitionIdx);
 		
 		assertNotNull(projectedLog);
 		assertEquals(log.size(), Iterables.size(projectedLog));
 		
 		ProjectedEvent event = projectedLog.iterator().next().iterator().next();
-		assertEquals(0, event.getActivity()); // transition A
+		assertEquals(0, (int) event.getActivity()); // transition A
 		assertEquals(10.0, event.getAttributeValue("X"));
 		
 		
-		builder.buildInstancesMultimap(projectedLog, transitionsLocalId);
+		Map<Integer, Multiset<Map<String, Object>>> instances = builder.buildInstancesMultimap(projectedLog, eventClass2TransitionIdx);
+		
+		System.out.println(instances);
+		
+		assertEquals(10, instances.get(1).size()); // B was seen 10 times
+		assertEquals(10, instances.get(1).count(Map.of("X", 10.0))); // B was seen 10 times with X = 10
+		assertEquals(20, instances.get(-1).count(Map.of("X", 5.0))); // non-B was seen 20 times with X = 5
+		assertEquals(0, instances.get(-1).count(Map.of("X", 10.0))); // non-B never saw X = 10
 		
 	}
 

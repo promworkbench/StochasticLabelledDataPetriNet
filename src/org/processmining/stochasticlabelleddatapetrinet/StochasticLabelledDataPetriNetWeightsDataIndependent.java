@@ -7,10 +7,10 @@ import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
-public class StochasticLabelledDataPetriNetWeightsDataIndependentImpl extends StochasticLabelledDataPetriNetImpl
+public class StochasticLabelledDataPetriNetWeightsDataIndependent extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {
 
-	public StochasticLabelledDataPetriNetWeightsDataIndependentImpl(StochasticLabelledPetriNet slpn) {
+	public StochasticLabelledDataPetriNetWeightsDataIndependent(StochasticLabelledPetriNet slpn) {
 		super(slpn, List.of(), List.of(), 
 			  emptyListOfLists(slpn.getNumberOfTransitions()), emptyListOfLists(slpn.getNumberOfTransitions()));
 	}

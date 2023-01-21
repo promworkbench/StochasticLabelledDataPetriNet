@@ -6,7 +6,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependentImpl;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapterImpl;
@@ -23,7 +23,7 @@ public class LogisticRegressionWeightFitter {
 
 	public StochasticLabelledDataPetriNetWeights fit(XLog log, StochasticLabelledDataPetriNet sldpn) {
 		
-		StochasticLabelledDataPetriNetWeightsDataDependentImpl sldpnWeights = new StochasticLabelledDataPetriNetWeightsDataDependentImpl(sldpn);
+		StochasticLabelledDataPetriNetWeightsDataDependent sldpnWeights = new StochasticLabelledDataPetriNetWeightsDataDependent(sldpn);
 		
 		for (int tIdx = 0; tIdx < sldpnWeights.getNumberOfTransitions(); tIdx++) {											
 

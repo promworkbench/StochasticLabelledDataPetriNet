@@ -1,6 +1,7 @@
 package org.processmining.stochasticlabelleddatapetrinet.weights.fitting;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.deckfour.xes.model.XAttributeMap;
 import org.processmining.datapetrinets.expression.GuardExpression;
 import org.processmining.log.utils.XUtils;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetrinetSemanticsDataUnaware;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
 import org.processmining.xesalignmentextension.XAlignmentExtension.MoveType;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
@@ -38,7 +41,7 @@ import weka.core.Instances;
 
 public class ObservationInstanceBuilder {
 	
-	final class ProjectedLogForDiscovery implements ProjectedLog {
+	private final class ProjectedLogForDiscovery implements ProjectedLog {
 
 		private Iterable<ProjectedTrace> projectedTraces;
 		private Map<String, Object> initialValues;
@@ -62,7 +65,7 @@ public class ObservationInstanceBuilder {
 
 	}
 
-	final class ProjectedTraceForDiscovery implements ProjectedTrace {
+	private final class ProjectedTraceForDiscovery implements ProjectedTrace {
 
 		private final List<ProjectedEvent> eventsForDiscovery;
 
@@ -96,7 +99,7 @@ public class ObservationInstanceBuilder {
 
 	private static final Object NULL = new Object();
 
-	final class ProjectedEventForDiscovery implements ProjectedEvent {
+	private  final class ProjectedEventForDiscovery implements ProjectedEvent {
 
 		private final Integer transition;
 		private final ImmutableMap<String, Object> attributes;
@@ -145,7 +148,6 @@ public class ObservationInstanceBuilder {
 	private boolean isTreatMissingValuesAsNA = true;
 	
 	private final Map<String, Object> initialValues;
-	// private final Map<String, Set<String>> literalValues;
 
 	public ObservationInstanceBuilder(StochasticLabelledDataPetriNet net, 
 			Iterable<XAlignment> alignedLog,
@@ -176,41 +178,82 @@ public class ObservationInstanceBuilder {
 	}
 	
 	
-	public Map<Integer, Multiset<Map<String, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, Map<String, Integer> transitionsLocalId) {
+	public Map<Integer, Multiset<Map<String, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, 
+			Map<String, Integer> eventClass2TransIdx) {
 		
 		final Map<Integer, Multiset<Map<String, Object>>> instances = new HashMap<>();
-		for (Integer clazz : transitionsLocalId.values()) {
+		for (Integer clazz : eventClass2TransIdx.values()) {
+			assert clazz >= 0: "we assume non negative transitions indicies";
+			// positive observations
 			instances.put(clazz, HashMultiset.<Map<String, Object>>create());
+			// negative observations
+			instances.put(-clazz, HashMultiset.<Map<String, Object>>create());
 		}
 		
-		final Map<String, Object> escapedInitialAttributes = getEscapedInitialAttributes(projectedLog);
+		StochasticLabelledDataPetriNetSemantics semantics = new StochasticLabelledDataPetrinetSemanticsDataUnaware(net);		
 		
+		final Map<String, Object> escapedInitialAttributes = getEscapedInitialAttributes(projectedLog);
 		final Map<String, Object> currentAttributeValues = new HashMap<>();
+		
 		for (ProjectedTrace trace : projectedLog) {
+
+			// We assume the SLDPN having no data weights here, so use empty state
+			semantics.setInitialState(semantics.newDataState());
+			
+			// Initial values for variables
 			currentAttributeValues.putAll(escapedInitialAttributes);
+						
+			// Add values from trace
+			extractAttributeValues(currentAttributeValues, trace);
+			
 			for (Iterator<ProjectedEvent> iterator = trace.iterator(); iterator.hasNext();) {
 				
-				ProjectedEvent e = iterator.next();
+				ProjectedEvent event = iterator.next();
 				
-				//TODO add the enabled but not chosen ones
-				instances.get(e.getActivity()).add(ImmutableMap.copyOf(currentAttributeValues));
+				// Add instances for enabled and chosen transitions
 				
-				// Update current values with observations
-				for (String attributeKey : e.getAttributes()) {
-					// NULL is used as marker for missing values
-					Object value = e.getAttributeValue(attributeKey);
-					String escapedKey = escapeAttributeName(attributeKey);
-					if (value == null) {
-						currentAttributeValues.put(escapedKey, NULL);
-					} else {
-						currentAttributeValues.put(escapedKey, value);
+				BitSet enabled = semantics.getEnabledTransitions();
+				for (int tIdx = enabled.nextSetBit(0); tIdx >= 0; tIdx = enabled.nextSetBit(tIdx + 1)) {
+					// operate on index i here
+					if (tIdx != event.getActivity()) {
+						// negative example transition with index tIdx was not chosen
+						instances.get(-tIdx).add(ImmutableMap.copyOf(currentAttributeValues));	
+					}
+					
+					if (tIdx == Integer.MAX_VALUE) {
+						break; // or (i+1) would overflow
 					}
 				}
+				
+				// positive example we chose transition corresponding to the event
+				instances.get(event.getActivity()).add(ImmutableMap.copyOf(currentAttributeValues));
+				
+				
+				// execute transitions
+				// we do not need to update datastate since we assume there are no relevant weights 
+				semantics.executeTransition(event.getActivity(), semantics.getDataState()); 
+				
+				// update data values written
+				extractAttributeValues(currentAttributeValues, event);
 			}
 			currentAttributeValues.clear();
 		}
 		
 		return instances;
+	}
+
+	private void extractAttributeValues(final Map<String, Object> currentAttributeValues, ProjectedAttributable attr) {
+		// Update current values with observations
+		for (String attributeKey : attr.getAttributes()) {
+			// NULL is used as marker for missing values
+			Object value = attr.getAttributeValue(attributeKey);
+			String escapedKey = escapeAttributeName(attributeKey);
+			if (value == null) {
+				currentAttributeValues.put(escapedKey, NULL);
+			} else {
+				currentAttributeValues.put(escapedKey, value);
+			}
+		}
 	}
 	
 	public Instances buildInstances(Map<Integer, Multiset<Map<String, Object>>> observations) {

@@ -1,12 +1,7 @@
 package org.processmining.stochasticlabelleddatapetrinet.weights.fitting;
 
-import java.util.Set;
-
-public interface ProjectedEvent {
+public interface ProjectedEvent extends ProjectedAttributable {
 	
-	Object getActivity();
+	Integer getActivity();
 
-	Object getAttributeValue(String attributeName);
-
-	Set<String> getAttributes();
 }

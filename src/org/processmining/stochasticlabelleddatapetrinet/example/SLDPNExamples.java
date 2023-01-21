@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependentImpl;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.SimpleLinearWeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsEditable;
@@ -28,7 +28,7 @@ public final class SLDPNExamples {
 		List<int[]> transRead = List.of(new int[] { }, new int[] { 0 }, new int[] { 0 });
 		List<int[]> transWrite =  List.of(new int[] { 0 }, new int[] { }, new int[] { });
 		
-		StochasticLabelledDataPetriNetWeightsDataDependentImpl sldpn = new StochasticLabelledDataPetriNetWeightsDataDependentImpl(slpn, varLabels, varTypes, transRead, transWrite);
+		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(slpn, varLabels, varTypes, transRead, transWrite);
 		
 		assert sldpn.getTransitionLabel(0).equals("A");
 		sldpn.setWeightFunction(0, new ConstantWeightFunction()); // A: weight = 1.0

@@ -9,7 +9,7 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFu
 import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
-public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends StochasticLabelledDataPetriNetImpl
+public class StochasticLabelledDataPetriNetWeightsDataDependent extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {
 
 	private List<WeightFunction> transitionWeights = new ArrayList<>();
@@ -20,7 +20,7 @@ public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends Stoc
 	 * 
 	 * @param sldpn
 	 */
-	public StochasticLabelledDataPetriNetWeightsDataDependentImpl(StochasticLabelledDataPetriNet sldpn) {
+	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet sldpn) {
 		super(sldpn);
 		for (int i = 0; i < getNumberOfTransitions(); i++) {
 			transitionWeights.add(new ConstantWeightFunction());
@@ -37,7 +37,7 @@ public class StochasticLabelledDataPetriNetWeightsDataDependentImpl extends Stoc
 	 * @param transitionReadVariables
 	 * @param transitionWriteVariables
 	 */
-	public StochasticLabelledDataPetriNetWeightsDataDependentImpl(StochasticLabelledPetriNet slpn,
+	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledPetriNet slpn,
 			List<String> variableLabels, List<VariableType> variableTypes, List<int[]> transitionReadVariables,
 			List<int[]> transitionWriteVariables) {
 		super(slpn, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);
