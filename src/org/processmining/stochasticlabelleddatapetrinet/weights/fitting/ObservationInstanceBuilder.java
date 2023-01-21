@@ -8,15 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
-import org.deckfour.xes.extension.std.XConceptExtension;
-import org.deckfour.xes.extension.std.XLifecycleExtension;
-import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeMap;
 import org.processmining.datapetrinets.expression.GuardExpression;
 import org.processmining.log.utils.XUtils;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetrinetSemanticsDataUnaware;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
@@ -144,8 +143,10 @@ public class ObservationInstanceBuilder {
 
 	private final Map<String, Class<?>> attributesForDiscovery;
 	private final Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypeMap;
+	private final Map<String, Integer> attributeIndexMap = new HashMap<>();
 
 	private boolean isTreatMissingValuesAsNA = true;
+	private boolean isUseWeights = true;
 	
 	private final Map<String, Object> initialValues;
 
@@ -236,6 +237,7 @@ public class ObservationInstanceBuilder {
 				// update data values written
 				extractAttributeValues(currentAttributeValues, event);
 			}
+			
 			currentAttributeValues.clear();
 		}
 		
@@ -256,81 +258,117 @@ public class ObservationInstanceBuilder {
 		}
 	}
 	
-	public Instances buildInstances(Map<Integer, Multiset<Map<String, Object>>> observations) {
+	public Instances buildInstances(Integer transition, Map<Integer, Multiset<Map<String, Object>>> observations) {
 		
-		String name = null; //TODO
-		ArrayList<Attribute> attributeList = new ArrayList<>(); //TODO
-		int capacity = 0; //TODO
-		Instances instances = new Instances(name, attributeList, capacity);	
+		String name = UUID.randomUUID().toString(); 
+		
+		Multiset<Map<String, Object>> positives = observations.get(transition);
+		Multiset<Map<String, Object>> negatives = observations.get(-transition);
+				
+		int capacity = positives.size() + negatives.size();
+		
+		Instances instances = new Instances(name, createAttributes(transition), capacity);	
 	
-		for (Entry<Integer, Multiset<Map<String, Object>>> classEntry : observations.entrySet()) {
-			for (com.google.common.collect.Multiset.Entry<Map<String, Object>> instanceEntry : classEntry.getValue()
-					.entrySet()) {
-				Map<String, Object> attributesWithNull = Maps.transformValues(instanceEntry.getElement(),
-						new Function<Object, Object>() {
-
-							public Object apply(Object val) {
-								if (val == NULL) {
-									return null;
-								} else {
-									return val;
-								}
-							}
-						});
-				
-				if (isUseWeights()) {
-					instances.add(createInstance(attributesWithNull, classEntry.getKey(), instanceEntry.getCount()));
-				} else {
-					for (int i = 0; i < instanceEntry.getCount(); i++) {
-						instances.add(createInstance(attributesWithNull, classEntry.getKey(), 1.0f));
-					}
-				}				
-				
-			}
-		}
+		addInstanceForClass(instances, transition, positives);
+		addInstanceForClass(instances, -transition, negatives);
 		
 		return instances;			
 	}
 
-	private Instance createInstance(Map<String, Object> variableAssignment, Integer target, float weight) {
+	private void addInstanceForClass(Instances instances, Integer targetClass, Multiset<Map<String, Object>> classSamples) {
+		for (Multiset.Entry<Map<String, Object>> entry : classSamples.entrySet()) {
+			Map<String, Object> attributesWithNull = Maps.transformValues(entry.getElement(),
+					(Function<Object, Object>) val -> {
+						if (val == NULL) {
+							return null;
+						} else {
+							return val;
+						}
+					});
+			
+			if (isUseWeights()) {
+				instances.add(createInstance(instances, attributesWithNull, targetClass, entry.getCount()));
+			} else {
+				for (int i = 0; i < entry.getCount(); i++) {
+					instances.add(createInstance(instances, attributesWithNull, targetClass, 1.0f));
+				}
+			}				
+			
+		}
+	}
+
+	private ArrayList<Attribute> createAttributes(Integer transition) {
+		// plus class attribute
+		ArrayList<Attribute> attributeList = new ArrayList<>(attributesForDiscovery.keySet().size() + 1);
+
+		for (Entry<String, VariableType> entry : attributeTypeMap.entrySet()) {
+			Attribute attr = createAttribute(entry);
+			attributeIndexMap.put(entry.getKey(), attributeList.size());
+			attributeList.add(attr);
+		} 
+
+		// positive and negative class
+		attributeList.add(new Attribute("class", List.of(String.valueOf(transition), 
+														String.valueOf(-transition))));
+		
+		
+		return attributeList;
+	}
+
+	private Attribute createAttribute(Entry<String, VariableType> entry) {
+		Attribute attr = null;
+		switch (entry.getValue()) {
+			case DISCRETE : // Do the same as case CONTINOUS
+			case CONTINUOUS :					
+				attr = new Attribute(entry.getKey());					
+				break;
+			case CATEGORICAL :
+				// TODO 
+				throw new UnsupportedOperationException("not yet supported");
+		}
+		return attr;
+	}
+
+	private Instance createInstance(Instances instances, Map<String, Object> variableAssignment, Integer target, float weight) {
 		Instance instance = new DenseInstance(variableAssignment.size());
-//		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
-//			Attribute attr = null;
-//			String attributeKey = entry.getKey();
-//			//FM, optimized lookup avoid O(n) array traversal in weka				
-//			Integer attributeIndex = attributeIndexMap.get(attributeKey);
-//			if (attributeIndex == null) {
-//				continue;
-//			}
-//			attr = instances.attribute(attributeIndex);
-//			if (attr == null)
-//				continue;
-//			Object value = entry.getValue();
-//			if (value == null) {
-//				// NULL means there is a missing value for this attribute
-//				instance.setMissing(attr);
-//			} else if (value instanceof Number && (variableType.get(attributeKey) == Type.DISCRETE
-//					|| variableType.get(attributeKey) == Type.CONTINUOS))
-//				instance.setValue(attr, ((Number) value).doubleValue());
-//			else if (value instanceof Date && variableType.get(attributeKey) == Type.TIMESTAMP)
-//				instance.setValue(attr, ((Date) value).getTime());
-//			else if (value instanceof Boolean && variableType.get(attributeKey) == Type.BOOLEAN) {
-//				if (((Boolean) value).booleanValue())
-//					instance.setValue(attr, TRUE_VALUE);
-//				else
-//					instance.setValue(attr, FALSE_VALUE);
-//			} else if (value instanceof String && variableType.get(attributeKey) == Type.LITERAL) {
-//				instance.setValue(attr, (String) value);
-//			} else {
-//				System.out.println("Skipped variable " + attributeKey + " with value " + entry.getValue());
-//			}
-//		}
+		instance.setWeight(weight);
+		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
+			
+			Attribute attr = null;
+			
+			String attributeKey = entry.getKey();
+			Integer attributeIndex = attributeIndexMap.get(attributeKey);
+			if (attributeIndex == null) {
+				throw new RuntimeException("Unknown attribute " + attributeKey);
+			}
+			
+			attr = instances.attribute(attributeIndex);
+			if (attr == null)
+				continue;
+			Object value = entry.getValue();
+			if (value == null) {
+				// NULL means there is a missing value for this attribute
+				instance.setMissing(attr);
+			} else if (value instanceof Number && (attributeTypeMap.get(attributeKey) == VariableType.DISCRETE
+					|| attributeTypeMap.get(attributeKey) == VariableType.CONTINUOUS))
+				instance.setValue(attr, ((Number) value).doubleValue());
+			else if (value instanceof Boolean && attributeTypeMap.get(attributeKey) == VariableType.CATEGORICAL) {
+				if (((Boolean) value).booleanValue())
+					instance.setValue(attr, 1);
+				else
+					instance.setValue(attr, 0);
+			} else if (value instanceof String && attributeTypeMap.get(attributeKey) == VariableType.CATEGORICAL) {
+				throw new UnsupportedOperationException("String variables not yet supported");
+			} else {
+				System.out.println("Skipped variable " + attributeKey + " with value " + entry.getValue());
+			}
+		}
 		return instance;
 	}
 	
 	
 	private boolean isUseWeights() {
-		return false;
+		return isUseWeights;
 	}
 
 	public boolean isTreatMissingValuesAsNA() {
@@ -363,11 +401,6 @@ public class ObservationInstanceBuilder {
 		return initialValuesForConsideredAttributes;
 	}
 
-	private boolean isRelevantAttribute(String key) {
-		return !(XConceptExtension.KEY_NAME.equals(key) || XTimeExtension.KEY_TIMESTAMP.equals(key)
-				|| XLifecycleExtension.KEY_TRANSITION.equals(key));
-	}
-	
 	private Map<String, Class<?>> transformToWekaNames(Map<String, Class<?>> attributesForDiscovery) {
 		com.google.common.collect.ImmutableMap.Builder<String, Class<?>> builder = ImmutableMap.builder();
 		for (Entry<String, Class<?>> attributeEntry : attributesForDiscovery.entrySet()) {
@@ -381,13 +414,9 @@ public class ObservationInstanceBuilder {
 		return builder.build(); // throws illegal argument when duplicate variable names are detected
 	}
 	
-	
-	
 	private static String escapeAttributeName(String attribute) {
 		//TODO find something better than this, unfortunately WEKA is rather strict on attribute names
 		return WekaUtil.fixVarName(attribute);
 	}	
-		
-	
 
 }

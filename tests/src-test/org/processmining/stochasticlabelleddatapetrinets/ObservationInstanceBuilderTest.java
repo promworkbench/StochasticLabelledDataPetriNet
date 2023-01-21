@@ -34,6 +34,8 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
+import weka.core.Instances;
+
 public class ObservationInstanceBuilderTest {
 	
 	@BeforeClass
@@ -114,6 +116,15 @@ public class ObservationInstanceBuilderTest {
 		assertEquals(10, instances.get(1).count(Map.of("X", 10.0))); // B was seen 10 times with X = 10
 		assertEquals(20, instances.get(-1).count(Map.of("X", 5.0))); // non-B was seen 20 times with X = 5
 		assertEquals(0, instances.get(-1).count(Map.of("X", 10.0))); // non-B never saw X = 10
+		
+		Instances wekaInstances = builder.buildInstances(1, instances);
+		
+		System.out.println(wekaInstances.toString());
+		
+		assertEquals(2, wekaInstances.size());
+		assertEquals(2, wekaInstances.numAttributes());
+		assertEquals(2, wekaInstances.numInstances());
+		assertEquals(30.0, wekaInstances.sumOfWeights(), 0.01);
 		
 	}
 
