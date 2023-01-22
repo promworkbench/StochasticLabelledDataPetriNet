@@ -40,15 +40,16 @@ public class DirectDataWeightFunction implements SerializableWeightFunction {
 	}
 
 	public void serialize(OutputStream os) throws IOException {
-		try (DataOutputStream dos = new DataOutputStream(os)) {
-			dos.writeInt(variableIdx);
-		}		
+		DataOutputStream dos = new DataOutputStream(os);
+		dos.writeInt(0); // version reserved
+		dos.writeInt(variableIdx);
+		dos.flush();
 	}
 
 	public void deserialize(InputStream is) throws IOException {		
-		try (DataInputStream dis = new DataInputStream(is)) {
-			variableIdx = dis.readInt();
-		}
+		DataInputStream dis = new DataInputStream(is);
+		dis.readInt();
+		variableIdx = dis.readInt();
 	}
 
 }

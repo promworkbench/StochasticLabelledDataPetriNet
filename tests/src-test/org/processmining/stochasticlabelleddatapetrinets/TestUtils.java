@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.log.utils.XLogBuilder;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataIndependent;
@@ -65,12 +64,12 @@ public class TestUtils {
 		return slpn;
 	}
 
-	static StochasticLabelledDataPetriNet buildConstantWeightTestModel() {		
+	static StochasticLabelledDataPetriNetWeightsDataIndependent buildConstantWeightTestModel() {		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();		
 		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
 	}
 
-	public static StochasticLabelledDataPetriNet buildDataWeightTestModel() {
+	public static StochasticLabelledDataPetriNetWeightsDataDependent buildDataWeightTestModel() {
 		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 		
@@ -94,7 +93,7 @@ public class TestUtils {
 		return sldpn;
 	}
 	
-public static StochasticLabelledDataPetriNet buildDataWeight2VariablesTestModel() {
+public static StochasticLabelledDataPetriNetWeightsDataDependent buildDataWeight2VariablesTestModel() {
 		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 		
