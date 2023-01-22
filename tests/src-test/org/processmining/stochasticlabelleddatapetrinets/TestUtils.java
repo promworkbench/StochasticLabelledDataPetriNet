@@ -15,7 +15,7 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetS
 
 public class TestUtils {
 
-	static XLog buildTestLog() {
+	public static XLog buildTestLog() {
 		final XLog log = XLogBuilder.newInstance()
 				.startLog("test")
 				.addTrace("t1", 10)
@@ -26,6 +26,18 @@ public class TestUtils {
 					.addEvent("C").build();	
 		return log;
 	}
+	
+	public static XLog buildTestLog2Variables() {
+		final XLog log = XLogBuilder.newInstance()
+				.startLog("test")
+				.addTrace("t1", 10)
+					.addEvent("A").addAttribute("X", 10.0).addAttribute("Y", -10.0)
+					.addEvent("B")
+				.addTrace("t2", 20)
+					.addEvent("A").addAttribute("X", 5.0).addAttribute("Y", -5.0)
+					.addEvent("C").build();	
+		return log;
+	}	
 
 	static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
 		// Simple XOR net
@@ -58,7 +70,7 @@ public class TestUtils {
 		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
 	}
 
-	static StochasticLabelledDataPetriNet buildDataWeightTestModel() {
+	public static StochasticLabelledDataPetriNet buildDataWeightTestModel() {
 		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 		
@@ -71,15 +83,39 @@ public class TestUtils {
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(slpn, varLabels, varTypes, transRead, transWrite);
 		
 		assert sldpn.getTransitionLabel(0).equals("A");
-		sldpn.setWeightFunction(0, new ConstantWeightFunction()); // A
+		sldpn.setWeightFunction(0, new ConstantWeightFunction());
 		
 		assert sldpn.getTransitionLabel(1).equals("B");
-		sldpn.setWeightFunction(1, new DirectDataWeightFunction(0)); // B
+		sldpn.setWeightFunction(1, new DirectDataWeightFunction(0));
 		
 		assert sldpn.getTransitionLabel(2).equals("C");
-		sldpn.setWeightFunction(2, new DirectDataWeightFunction(0)); // B		
+		sldpn.setWeightFunction(2, new DirectDataWeightFunction(0));	
 		
 		return sldpn;
 	}
+	
+public static StochasticLabelledDataPetriNet buildDataWeight2VariablesTestModel() {
+		
+		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
+		
+		// Add variable		
+		List<String> varLabels = List.of("X", "Y");
+		List<VariableType> varTypes = List.of(VariableType.CONTINUOUS, VariableType.CONTINUOUS);
+		List<int[]> transRead = List.of(new int[] { }, new int[] { 0, 1 }, new int[] { 0, 1 });
+		List<int[]> transWrite =  List.of(new int[] { 0, 1 }, new int[] { }, new int[] { });
+		
+		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(slpn, varLabels, varTypes, transRead, transWrite);
+		
+		assert sldpn.getTransitionLabel(0).equals("A");
+		sldpn.setWeightFunction(0, new ConstantWeightFunction());
+		
+		assert sldpn.getTransitionLabel(1).equals("B");
+		sldpn.setWeightFunction(1, new ConstantWeightFunction());
+		
+		assert sldpn.getTransitionLabel(2).equals("C");
+		sldpn.setWeightFunction(2, new ConstantWeightFunction()); 
+		
+		return sldpn;
+	}	
 
 }

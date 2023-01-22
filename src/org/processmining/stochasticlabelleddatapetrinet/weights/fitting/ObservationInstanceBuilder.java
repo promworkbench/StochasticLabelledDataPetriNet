@@ -186,9 +186,9 @@ public class ObservationInstanceBuilder {
 		for (Integer clazz : eventClass2TransIdx.values()) {
 			assert clazz >= 0: "we assume non negative transitions indicies";
 			// positive observations
-			instances.put(clazz, HashMultiset.<Map<String, Object>>create());
+			instances.put((clazz+1), HashMultiset.<Map<String, Object>>create());
 			// negative observations
-			instances.put(-clazz, HashMultiset.<Map<String, Object>>create());
+			instances.put(-(clazz+1), HashMultiset.<Map<String, Object>>create());
 		}
 		
 		StochasticLabelledDataPetriNetSemantics semantics = new StochasticLabelledDataPetrinetSemanticsDataUnaware(net);		
@@ -218,7 +218,7 @@ public class ObservationInstanceBuilder {
 					// operate on index i here
 					if (tIdx != event.getActivity()) {
 						// negative example transition with index tIdx was not chosen
-						instances.get(-tIdx).add(ImmutableMap.copyOf(currentAttributeValues));	
+						instances.get(-(tIdx+1)).add(ImmutableMap.copyOf(currentAttributeValues));	
 					}
 					
 					if (tIdx == Integer.MAX_VALUE) {
@@ -227,7 +227,7 @@ public class ObservationInstanceBuilder {
 				}
 				
 				// positive example we chose transition corresponding to the event
-				instances.get(event.getActivity()).add(ImmutableMap.copyOf(currentAttributeValues));
+				instances.get(event.getActivity() + 1).add(ImmutableMap.copyOf(currentAttributeValues));
 				
 				
 				// execute transitions
@@ -260,17 +260,19 @@ public class ObservationInstanceBuilder {
 	
 	public Instances buildInstances(Integer transition, Map<Integer, Multiset<Map<String, Object>>> observations) {
 		
-		String name = UUID.randomUUID().toString(); 
+		String name = UUID.randomUUID().toString();  // dont care about the name
 		
-		Multiset<Map<String, Object>> positives = observations.get(transition);
-		Multiset<Map<String, Object>> negatives = observations.get(-transition);
+		// convention that negative class is negation (add +1 to avoid 0 as index)
+		Multiset<Map<String, Object>> positives = observations.get((transition+1));
+		Multiset<Map<String, Object>> negatives = observations.get(-(transition+1));
 				
 		int capacity = positives.size() + negatives.size();
 		
 		Instances instances = new Instances(name, createAttributes(transition), capacity);	
-	
-		addInstanceForClass(instances, transition, positives);
-		addInstanceForClass(instances, -transition, negatives);
+		instances.setClassIndex(0); // class is always first attribute
+		
+		addInstanceForClass(instances, 1, positives); // transition fires
+		addInstanceForClass(instances, 0, negatives); // transition does not fire
 		
 		return instances;			
 	}
@@ -301,17 +303,14 @@ public class ObservationInstanceBuilder {
 		// plus class attribute
 		ArrayList<Attribute> attributeList = new ArrayList<>(attributesForDiscovery.keySet().size() + 1);
 
+		// positive and negative class
+		attributeList.add(new Attribute("class", List.of("1", "0")));
+				
 		for (Entry<String, VariableType> entry : attributeTypeMap.entrySet()) {
 			Attribute attr = createAttribute(entry);
 			attributeIndexMap.put(entry.getKey(), attributeList.size());
 			attributeList.add(attr);
 		} 
-
-		// positive and negative class
-		attributeList.add(new Attribute("class", List.of(String.valueOf(transition), 
-														String.valueOf(-transition))));
-		
-		
 		return attributeList;
 	}
 
@@ -330,8 +329,11 @@ public class ObservationInstanceBuilder {
 	}
 
 	private Instance createInstance(Instances instances, Map<String, Object> variableAssignment, Integer target, float weight) {
-		Instance instance = new DenseInstance(variableAssignment.size());
+		Instance instance = new DenseInstance(variableAssignment.size()+1);
 		instance.setWeight(weight);
+		
+		instance.setValue(instances.attribute(0), String.valueOf(target)); // Class value
+		
 		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
 			
 			Attribute attr = null;
@@ -345,6 +347,7 @@ public class ObservationInstanceBuilder {
 			attr = instances.attribute(attributeIndex);
 			if (attr == null)
 				continue;
+			
 			Object value = entry.getValue();
 			if (value == null) {
 				// NULL means there is a missing value for this attribute
@@ -365,7 +368,6 @@ public class ObservationInstanceBuilder {
 		}
 		return instance;
 	}
-	
 	
 	private boolean isUseWeights() {
 		return isUseWeights;

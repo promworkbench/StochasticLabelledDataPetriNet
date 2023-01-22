@@ -20,6 +20,8 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter.PetrinetMarkedWithMappings;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetUtils;
+import org.processmining.stochasticlabelleddatapetrinet.weights.LogisticWeightFunction;
+import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
@@ -28,12 +30,21 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
 import weka.classifiers.functions.Logistic;
+import weka.core.Attribute;
 import weka.core.Instances;
 
+/**
+ * Fits a logistic regression using WEKA to the observations and adds the
+ * respective WeightFunction to the transitions. Assumes that transition labels
+ * and variable names in the given SLDPN exactly match the attributes in the
+ * event log based on the provided classifier.
+ * 
+ * @author F. Mannhardt
+ *
+ */
 public class LogisticRegressionWeightFitter implements WeightFitter {
 
 	private final XEventClassifier classifier;
-	private final Logistic logistic;
 
 	private int defaultMoveOnModelCost = 1;
 	private int defaultMoveOnLogCost = 1;
@@ -43,7 +54,6 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 	public LogisticRegressionWeightFitter(XEventClassifier classifier) {
 		super();
 		this.classifier = classifier;
-		this.logistic = new weka.classifiers.functions.Logistic();
 	}
 
 	@Override
@@ -53,13 +63,23 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpnWeights = new StochasticLabelledDataPetriNetWeightsDataDependent(
 				net);
 
-		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net);
+		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net); // this is guessing a final marking
+
 		try {
+
+			// using default alignment
 			Iterable<XAlignment> alignIter = alignLog(log, markedPN);
 
 			Map<String, Integer> eventClass2TransitionIdx = builderEventClassMapping(net, markedPN);
-			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);		
+
+			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);
+			// TODO support filtering of attributes 
 			Set<String> attributesConsidered = Set.copyOf(variablesWritten.values());
+
+			Map<String, Integer> variableIdx = new HashMap<>();
+			for (int i = 0; i < net.getNumberOfVariables(); i++) {
+				variableIdx.put(net.getVariableLabel(i), i);
+			}
 
 			ObservationInstanceBuilder builder = createObservationBuilder(net, alignIter);
 
@@ -68,14 +88,46 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 			Map<Integer, Multiset<Map<String, Object>>> instancesMultimap = builder.buildInstancesMultimap(projectedLog,
 					eventClass2TransitionIdx);
-			
-			Instances wekaInstances = builder.buildInstances(1, instancesMultimap);
 
-			try {
-				logistic.buildClassifier(wekaInstances);
-			} catch (Exception e1) {
-				throw new WeightFitterException(e1);
+			for (int tIdx = 0; tIdx < net.getNumberOfTransitions(); tIdx++) {
+
+				Instances wekaInstances = builder.buildInstances(tIdx, instancesMultimap);
+
+				// We need samples for both cases to infer a meaningful function
+				if (wekaInstances.numDistinctValues(0) > 1) {
+					try {
+						Logistic logistic = new weka.classifiers.functions.Logistic();
+						logistic.buildClassifier(wekaInstances);
+
+						double[][] coefficients = logistic.coefficients();
+
+						assert coefficients[0].length == 1 : "We expect only one intercept as we only have two classes ";
+						double intercept = coefficients[0][0];
+
+						double[] weightCoeff = new double[net.getNumberOfVariables()];
+						
+						// skip class attribute, which is first by convention!
+						for (int i = 1; i < coefficients.length; i++) {
+
+							assert coefficients[i].length == 1 : "We expect coefficients to be scalars";
+							assert wekaInstances.classIndex() == 0;
+
+							Attribute attr = wekaInstances.attribute(i);
+							Integer varIdxInModel = variableIdx.get(WekaUtil.wekaUnescape(attr.name())); //TODO this is still dangerous since escape<->unescape is not lossless in all cases! 
+
+							weightCoeff[varIdxInModel] = coefficients[i][0];
+						}
+
+						sldpnWeights.setWeightFunction(tIdx, new LogisticWeightFunction(intercept, weightCoeff));
+
+					} catch (Exception e1) {
+						throw new WeightFitterException(e1);
+					}
+				} else {
+					System.out.println("Instances only recorded for one class, no fitting possible!");
+				}
 			}
+
 		} catch (ControlFlowAlignmentException | DataAlignmentException | WeightFitterException e) {
 			throw new WeightFitterException(e);
 		}
@@ -83,7 +135,8 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		return sldpnWeights;
 	}
 
-	private Map<String, Integer> builderEventClassMapping(StochasticLabelledDataPetriNet net, PetrinetMarkedWithMappings markedPN) {
+	private Map<String, Integer> builderEventClassMapping(StochasticLabelledDataPetriNet net,
+			PetrinetMarkedWithMappings markedPN) {
 		Map<String, Integer> eventClass2TransitionIdx = new HashMap<>();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
 			eventClass2TransitionIdx.put(markedPN.getTransitionIndexToId().get(i), i);
@@ -103,9 +156,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 			variableClasses.put(net.getVariableLabel(i), typeToClass(variableType));
 		}
 
-		ObservationInstanceBuilder builder = new ObservationInstanceBuilder(net, alignIter, initialValues,
-				variableClasses, variableTypes);
-		return builder;
+		return new ObservationInstanceBuilder(net, alignIter, initialValues, variableClasses, variableTypes);
 	}
 
 	private SetMultimap<Integer, String> buildVariablesWritten(StochasticLabelledDataPetriNet net) {

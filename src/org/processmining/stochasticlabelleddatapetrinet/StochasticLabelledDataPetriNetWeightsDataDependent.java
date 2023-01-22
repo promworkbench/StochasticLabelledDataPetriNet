@@ -46,8 +46,8 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent extends Stochast
 		}
 	}
 
-	public void setWeightFunction(int transitionidx, WeightFunction function) {
-		transitionWeights.set(transitionidx, function);
+	public void setWeightFunction(int transition, WeightFunction function) {
+		transitionWeights.set(transition, function);
 	}	
 
 	@Override
