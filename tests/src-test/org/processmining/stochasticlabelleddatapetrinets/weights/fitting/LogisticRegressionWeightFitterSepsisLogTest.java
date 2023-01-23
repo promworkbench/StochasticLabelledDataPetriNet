@@ -11,6 +11,7 @@ import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeExc
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.LogisticRegressionWeightFitter;
+import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.WeightFitter;
 import org.processmining.stochasticlabelleddatapetrinet.weights.writeops.AllWriteOperationMiner;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
 import org.processmining.stochasticlabelleddatapetrinets.SepsisTestLog;
@@ -37,7 +38,7 @@ public class LogisticRegressionWeightFitterSepsisLogTest {
 		
 		net = writeOpMiner.extendWithWrites(net);
 		
-		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+		WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(log, net);
 		

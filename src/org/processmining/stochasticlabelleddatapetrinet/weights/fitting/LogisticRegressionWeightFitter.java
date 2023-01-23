@@ -29,6 +29,7 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
+import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.Logistic;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -51,9 +52,21 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 	private int defaultMissingWriteOpCost = 1;
 	private int defaultIncorrectWriteOpCost = 1;
 
+	private final boolean keepEvaluation;
+	private final Map<Integer, Evaluation> evaluations = new HashMap<>();
+
 	public LogisticRegressionWeightFitter(XEventClassifier classifier) {
+		this(classifier, true);
+	}
+
+	public LogisticRegressionWeightFitter(XEventClassifier classifier, boolean keepEvaluation) {
 		super();
+		this.keepEvaluation = keepEvaluation;
 		this.classifier = classifier;
+	}
+
+	public Map<Integer, Evaluation> getEvaluations() {
+		return evaluations;
 	}
 
 	@Override
@@ -66,7 +79,6 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net); // this is guessing a final marking
 
 		try {
-
 			// using default alignment
 			Iterable<XAlignment> alignIter = alignLog(log, markedPN);
 
@@ -99,13 +111,23 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
 						logistic.buildClassifier(wekaInstances);
 
+						if (keepEvaluation) {
+							Evaluation eval = new weka.classifiers.evaluation.Evaluation(wekaInstances);
+							eval.evaluateModel(logistic, wekaInstances);
+							evaluations.put(tIdx, eval);
+							System.out.println(String.format("%s (%s): f1: %.4f, prc: %.4f, distribution: %.0f, %.0f", 
+									tIdx, net.getTransitionLabel(tIdx),
+									eval.fMeasure(0), eval.areaUnderPRC(0), 
+									eval.getClassPriors()[0], eval.getClassPriors()[1]));
+						}
+
 						double[][] coefficients = logistic.coefficients();
 
 						assert coefficients[0].length == 1 : "We expect only one intercept as we only have two classes ";
 						double intercept = coefficients[0][0];
 
 						double[] weightCoeff = new double[net.getNumberOfVariables()];
-						
+
 						// skip class attribute, which is first by convention!
 						for (int i = 1; i < coefficients.length; i++) {
 
@@ -113,7 +135,12 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 							assert wekaInstances.classIndex() == 0;
 
 							Attribute attr = wekaInstances.attribute(i);
-							Integer varIdxInModel = variableIdx.get(WekaUtil.wekaUnescape(attr.name())); //TODO this is still dangerous since escape<->unescape is not lossless in all cases! 
+
+							//TODO this is still dangerous since escape<->unescape is not lossless in all cases!
+							Integer varIdxInModel = variableIdx.get(WekaUtil.wekaUnescape(attr.name()));
+							if (varIdxInModel == null) {
+								throw new RuntimeException("Could not find variable in model " + attr.name());
+							}
 
 							weightCoeff[varIdxInModel] = coefficients[i][0];
 						}
