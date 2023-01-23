@@ -1,6 +1,7 @@
 package org.processmining.stochasticlabelleddatapetrinet;
 
 import org.processmining.datapetrinets.expression.GuardExpression;
+import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
 
 /**
  * Inspired by StochasticLabelledPetriNet but not in an inheritance relation
@@ -146,4 +147,7 @@ public interface StochasticLabelledDataPetriNet {
 	 *         for each call.
 	 */
 	public StochasticLabelledDataPetriNetSemantics getDefaultSemantics();
+	
+	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer();
+	
 }

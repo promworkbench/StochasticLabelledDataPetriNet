@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
+import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
+import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
@@ -113,6 +115,10 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent extends Stochast
 	public StochasticLabelledDataPetriNetSemantics getDefaultSemantics() {
 		return new StochasticLabelledDataPetriNetSemanticsWeightsImpl(this,
 				new DataStateFactoryImpl(getNumberOfVariables())); 
+	}
+
+	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer() {
+		return new StochasticLabelledDataPetriNetSerializerImpl();
 	}
 
 }

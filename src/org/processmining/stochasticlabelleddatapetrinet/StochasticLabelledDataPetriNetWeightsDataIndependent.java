@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
+import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
 public class StochasticLabelledDataPetriNetWeightsDataIndependent extends StochasticLabelledDataPetriNetImpl
@@ -28,6 +29,10 @@ public class StochasticLabelledDataPetriNetWeightsDataIndependent extends Stocha
 	public StochasticLabelledDataPetriNetSemantics getDefaultSemantics() {
 		return new StochasticLabelledDataPetriNetSemanticsWeightsImpl(this,
 				new DataStateFactoryImpl(getNumberOfVariables()));
+	}
+
+	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer() {
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
 }

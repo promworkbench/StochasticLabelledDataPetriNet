@@ -11,5 +11,5 @@ public interface StochasticLabelledDataPetriNetWeights extends StochasticLabelle
 	 * @return the weight of the transition.
 	 */
 	public double getTransitionWeight(int transition, DataState dataState);
-
+	
 }

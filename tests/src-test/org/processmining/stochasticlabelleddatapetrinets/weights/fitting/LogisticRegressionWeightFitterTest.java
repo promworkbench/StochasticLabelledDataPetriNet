@@ -11,6 +11,7 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.LogisticRegressionWeightFitter;
+import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.WeightFitter;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.WeightFitterException;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
 import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
@@ -33,7 +34,7 @@ public class LogisticRegressionWeightFitterTest {
 		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeightTestModel();
 		XLog log = SimpleTestLog.buildTestLog();
 		
-		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+		WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(log, net);
 		
@@ -47,7 +48,7 @@ public class LogisticRegressionWeightFitterTest {
 		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeight2VariablesTestModel();
 		XLog log = SimpleTestLog.buildTestLog2Variables();
 		
-		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+		WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(log, net);
 		
