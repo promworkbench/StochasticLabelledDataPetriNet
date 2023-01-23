@@ -1,9 +1,10 @@
 package org.processmining.stochasticlabelleddatapetrinet.weights.writeops;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 
 public interface WriteOperationMiner {
-	
-	public StochasticLabelledDataPetriNet extendWithWrites(StochasticLabelledDataPetriNet net);
+
+	public StochasticLabelledDataPetriNetWeightsDataDependent extendWithWrites(StochasticLabelledDataPetriNet<?> net);
 
 }

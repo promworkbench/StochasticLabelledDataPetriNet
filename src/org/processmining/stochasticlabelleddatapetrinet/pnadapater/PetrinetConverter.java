@@ -17,68 +17,68 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetS
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsImpl;
 
 public class PetrinetConverter {
-	
+
 	public interface PetrinetMarkedWithMappings {
-		
+
 		Petrinet getNet();
 
 		Marking getInitialMarking();
 
 		Marking[] getFinalMarkings();
-		
+
 		Map<Integer, String> getTransitionIndexToId();
 
 	}
 
-	public static PetrinetMarkedWithMappings viewAsPetrinet(StochasticLabelledDataPetriNet sldpn) {
-		
+	public static PetrinetMarkedWithMappings viewAsPetrinet(StochasticLabelledDataPetriNet<?> sldpn) {
+
 		PetrinetImpl pn = new PetrinetImpl("Converted from " + sldpn.toString());
 		Map<Integer, String> conversionMap = new HashMap<>();
-		
+
 		Transition[] transitions = new Transition[sldpn.getNumberOfTransitions()];
 		Place[] places = new Place[sldpn.getNumberOfPlaces()];
-		
+
 		for (int i = 0; i < sldpn.getNumberOfTransitions(); i++) {
 			if (sldpn.isTransitionSilent(i)) {
-				transitions[i] = pn.addTransition("tau"+i);
+				transitions[i] = pn.addTransition("tau" + i);
 				transitions[i].setInvisible(true);
 			} else {
 				transitions[i] = pn.addTransition(sldpn.getTransitionLabel(i));
 			}
 			conversionMap.put(i, transitions[i].getLocalID().toString());
 		}
-		
+
 		for (int i = 0; i < sldpn.getNumberOfPlaces(); i++) {
 			places[i] = pn.addPlace("p" + i);
 		}
-			
+
 		for (int i = 0; i < sldpn.getNumberOfTransitions(); i++) {
-			for (int placeIdx: sldpn.getInputPlaces(i)) {
+			for (int placeIdx : sldpn.getInputPlaces(i)) {
 				pn.addArc(places[placeIdx], transitions[i]);
 			}
-			for (int placeIdx: sldpn.getOutputPlaces(i)) {
+			for (int placeIdx : sldpn.getOutputPlaces(i)) {
 				pn.addArc(transitions[i], places[placeIdx]);
 			}
 		}
-		
+
 		Marking initialMarking = new Marking();
 		for (int i = 0; i < sldpn.getNumberOfPlaces(); i++) {
 			if (sldpn.isInInitialMarking(i) > 0) {
-				initialMarking.add(places[i], sldpn.isInInitialMarking(i));				
+				initialMarking.add(places[i], sldpn.isInInitialMarking(i));
 			}
 		}
 		Marking[] finalMarkings = new Marking[0]; // We don't have that information
-		
+
 		return new PetrinetMarkedWithMappings() {
-			
+
 			public Petrinet getNet() {
 				return pn;
 			}
-			
+
 			public Marking getInitialMarking() {
 				return initialMarking;
 			}
-			
+
 			public Marking[] getFinalMarkings() {
 				return finalMarkings;
 			}
@@ -88,17 +88,17 @@ public class PetrinetConverter {
 			}
 		};
 	}
-	
-	public static StochasticLabelledDataPetriNet viewAsSLDPN(AcceptingPetriNet acceptingPN) {
-		
+
+	public static StochasticLabelledDataPetriNetWeightsDataIndependent viewAsSLDPN(AcceptingPetriNet acceptingPN) {
+
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = new StochasticLabelledPetriNetSimpleWeightsImpl();
 
 		Petrinet net = acceptingPN.getNet();
-		
+
 		Map<Place, Integer> placeIdx = new HashMap<>();
 		Map<Transition, Integer> transitionIdx = new HashMap<>();
-		
-		for (Place p: net.getPlaces()) {
+
+		for (Place p : net.getPlaces()) {
 			int idx = slpn.addPlace();
 			Integer tokens = acceptingPN.getInitialMarking().occurrences(p);
 			if (tokens > 0) {
@@ -106,24 +106,24 @@ public class PetrinetConverter {
 			}
 			placeIdx.put(p, idx);
 		}
-		
-		for (Transition t: net.getTransitions()) {
+
+		for (Transition t : net.getTransitions()) {
 			int idx = slpn.addTransition(0);
 			transitionIdx.put(t, idx);
-			
-			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e: net.getOutEdges(t)) {
+
+			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getOutEdges(t)) {
 				slpn.addTransitionPlaceArc(idx, placeIdx.get(e.getTarget()));
 			}
-			
-			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e: net.getInEdges(t)) {
+
+			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getInEdges(t)) {
 				slpn.addPlaceTransitionArc(placeIdx.get(e.getSource()), idx);
 			}
-			
+
 			if (!t.isInvisible()) {
 				slpn.setTransitionLabel(idx, t.getLabel());
 			}
 		}
-		
+
 		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
 	}
 

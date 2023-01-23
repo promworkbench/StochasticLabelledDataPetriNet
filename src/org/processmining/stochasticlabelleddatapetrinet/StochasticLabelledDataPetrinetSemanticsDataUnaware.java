@@ -3,7 +3,7 @@ package org.processmining.stochasticlabelleddatapetrinet;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
 
 public class StochasticLabelledDataPetrinetSemanticsDataUnaware extends StochasticLabelledDataPetriNetSemanticsImpl {
-	public StochasticLabelledDataPetrinetSemanticsDataUnaware(StochasticLabelledDataPetriNet net) {
+	public StochasticLabelledDataPetrinetSemanticsDataUnaware(StochasticLabelledDataPetriNet<?> net) {
 		super(net, new DataStateFactoryImpl(0));
 		setStrictWriteSemantics(false); // we do not care about writing
 	}

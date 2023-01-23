@@ -9,7 +9,8 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-public abstract class StochasticLabelledDataPetriNetImpl implements StochasticLabelledDataPetriNet {
+public abstract class StochasticLabelledDataPetriNetImpl<T extends StochasticLabelledDataPetriNetImpl<T>>
+		implements StochasticLabelledDataPetriNet<T> {
 
 	protected interface SLPN {
 
@@ -46,45 +47,47 @@ public abstract class StochasticLabelledDataPetriNetImpl implements StochasticLa
 	private final List<int[]> writeVariables;
 
 	/**
-	 * Copy constructor from an existing SLDPN and the given data elements providing an immutable SLDPN.
+	 * Copy constructor from an existing SLDPN and the given data elements
+	 * providing an immutable SLDPN.
 	 * 
 	 * @param slpn
 	 * @param variableLabels
 	 * @param variableTypes
 	 * @param transitionReadVariables
 	 * @param transitionWriteVariables
-	 */	
-	public StochasticLabelledDataPetriNetImpl(StochasticLabelledPetriNet sldpn, List<String> variableLabels, List<VariableType> variableTypes, List<int[]> readVariables, List<int[]> writeVariables) {
+	 */
+	public StochasticLabelledDataPetriNetImpl(StochasticLabelledPetriNet sldpn, List<String> variableLabels,
+			List<VariableType> variableTypes, List<int[]> readVariables, List<int[]> writeVariables) {
 		this(new SLPN() {
-			
+
 			public int isInInitialMarking(int place) {
 				return sldpn.isInInitialMarking(place);
 			}
-			
+
 			public String getTransitionLabel(int transition) {
 				return sldpn.getTransitionLabel(transition);
 			}
-			
+
 			public int[] getOutputTransitions(int place) {
 				return sldpn.getOutputTransitions(place);
 			}
-			
+
 			public int[] getOutputPlaces(int transition) {
 				return sldpn.getOutputPlaces(transition);
 			}
-			
+
 			public int getNumberOfTransitions() {
 				return sldpn.getNumberOfTransitions();
 			}
-			
+
 			public int getNumberOfPlaces() {
 				return sldpn.getNumberOfPlaces();
 			}
-			
+
 			public int[] getInputTransitions(int place) {
 				return sldpn.getInputTransitions(place);
 			}
-			
+
 			public int[] getInputPlaces(int transition) {
 				return sldpn.getInputPlaces(transition);
 			}
@@ -101,7 +104,7 @@ public abstract class StochasticLabelledDataPetriNetImpl implements StochasticLa
 	 * @param transitionReadVariables
 	 * @param transitionWriteVariables
 	 */
-	public StochasticLabelledDataPetriNetImpl(StochasticLabelledDataPetriNet sldpn) {
+	public StochasticLabelledDataPetriNetImpl(StochasticLabelledDataPetriNet<?> sldpn) {
 		this(new SLPN() {
 
 			public int isInInitialMarking(int place) {

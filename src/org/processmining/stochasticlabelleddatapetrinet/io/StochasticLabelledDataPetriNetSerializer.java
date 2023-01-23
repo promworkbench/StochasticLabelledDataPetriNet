@@ -7,12 +7,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 
-public interface StochasticLabelledDataPetriNetSerializer {
+public interface StochasticLabelledDataPetriNetSerializer<T extends StochasticLabelledDataPetriNet<T>> {
 
-	void serialize(StochasticLabelledDataPetriNet net, OutputStream os) throws IOException;
+	void serialize(T net, OutputStream os) throws IOException;
 
-	StochasticLabelledDataPetriNet deserialize(InputStream is)
-			throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, NoSuchMethodException, SecurityException;
+	T deserialize(InputStream is) throws IOException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException;
 
 }

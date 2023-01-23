@@ -8,12 +8,13 @@ import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFacto
 import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
-public class StochasticLabelledDataPetriNetWeightsDataIndependent extends StochasticLabelledDataPetriNetImpl
-		implements StochasticLabelledDataPetriNetWeights {
+public class StochasticLabelledDataPetriNetWeightsDataIndependent
+		extends StochasticLabelledDataPetriNetImpl<StochasticLabelledDataPetriNetWeightsDataIndependent>
+		implements StochasticLabelledDataPetriNetWeights<StochasticLabelledDataPetriNetWeightsDataIndependent> {
 
 	public StochasticLabelledDataPetriNetWeightsDataIndependent(StochasticLabelledPetriNet slpn) {
-		super(slpn, List.of(), List.of(), 
-			  emptyListOfLists(slpn.getNumberOfTransitions()), emptyListOfLists(slpn.getNumberOfTransitions()));
+		super(slpn, List.of(), List.of(), emptyListOfLists(slpn.getNumberOfTransitions()),
+				emptyListOfLists(slpn.getNumberOfTransitions()));
 	}
 
 	private static List<int[]> emptyListOfLists(int size) {
@@ -31,7 +32,7 @@ public class StochasticLabelledDataPetriNetWeightsDataIndependent extends Stocha
 				new DataStateFactoryImpl(getNumberOfVariables()));
 	}
 
-	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer() {
+	public StochasticLabelledDataPetriNetSerializer<StochasticLabelledDataPetriNetWeightsDataIndependent> getDefaultSerializer() {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 

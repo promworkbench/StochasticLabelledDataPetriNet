@@ -15,7 +15,6 @@ import org.processmining.plugins.balancedconformance.controlflow.ControlFlowAlig
 import org.processmining.plugins.balancedconformance.dataflow.exception.DataAlignmentException;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter.PetrinetMarkedWithMappings;
@@ -42,7 +41,8 @@ import weka.core.Instances;
  * @author F. Mannhardt
  *
  */
-public class LogisticRegressionWeightFitter implements WeightFitter {
+public class LogisticRegressionWeightFitter
+		implements WeightFitter<StochasticLabelledDataPetriNetWeightsDataDependent> {
 
 	private final XEventClassifier classifier;
 
@@ -57,7 +57,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 	}
 
 	@Override
-	public StochasticLabelledDataPetriNetWeights fit(XLog log, StochasticLabelledDataPetriNet net)
+	public StochasticLabelledDataPetriNetWeightsDataDependent fit(XLog log, StochasticLabelledDataPetriNet<?> net)
 			throws WeightFitterException {
 
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpnWeights = new StochasticLabelledDataPetriNetWeightsDataDependent(
@@ -105,7 +105,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 						double intercept = coefficients[0][0];
 
 						double[] weightCoeff = new double[net.getNumberOfVariables()];
-						
+
 						// skip class attribute, which is first by convention!
 						for (int i = 1; i < coefficients.length; i++) {
 
@@ -135,7 +135,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		return sldpnWeights;
 	}
 
-	private Map<String, Integer> builderEventClassMapping(StochasticLabelledDataPetriNet net,
+	private Map<String, Integer> builderEventClassMapping(StochasticLabelledDataPetriNet<?> net,
 			PetrinetMarkedWithMappings markedPN) {
 		Map<String, Integer> eventClass2TransitionIdx = new HashMap<>();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
@@ -144,7 +144,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		return eventClass2TransitionIdx;
 	}
 
-	private ObservationInstanceBuilder createObservationBuilder(StochasticLabelledDataPetriNet net,
+	private ObservationInstanceBuilder createObservationBuilder(StochasticLabelledDataPetriNet<?> net,
 			Iterable<XAlignment> alignIter) {
 		Map<String, Object> initialValues = Map.of();
 		Map<String, Class<?>> variableClasses = new HashMap<>();
@@ -159,7 +159,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		return new ObservationInstanceBuilder(net, alignIter, initialValues, variableClasses, variableTypes);
 	}
 
-	private SetMultimap<Integer, String> buildVariablesWritten(StochasticLabelledDataPetriNet net) {
+	private SetMultimap<Integer, String> buildVariablesWritten(StochasticLabelledDataPetriNet<?> net) {
 		SetMultimap<Integer, String> variablesWritten = SetMultimapBuilder.hashKeys().hashSetValues().build();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
 			int[] variablesWrittenIdx = net.getWriteVariables(i);

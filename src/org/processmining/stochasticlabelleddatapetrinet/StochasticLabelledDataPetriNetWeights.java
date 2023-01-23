@@ -2,7 +2,8 @@ package org.processmining.stochasticlabelleddatapetrinet;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
-public interface StochasticLabelledDataPetriNetWeights extends StochasticLabelledDataPetriNet {
+public interface StochasticLabelledDataPetriNetWeights<T extends StochasticLabelledDataPetriNetWeights<T>>
+		extends StochasticLabelledDataPetriNet<T> {
 
 	/**
 	 * 
@@ -11,5 +12,5 @@ public interface StochasticLabelledDataPetriNetWeights extends StochasticLabelle
 	 * @return the weight of the transition.
 	 */
 	public double getTransitionWeight(int transition, DataState dataState);
-	
+
 }
