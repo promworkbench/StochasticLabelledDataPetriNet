@@ -1,7 +1,6 @@
 package org.processmining.stochasticlabelleddatapetrinet.logadapter;
 
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.deckfour.xes.model.XEvent;
@@ -22,12 +21,9 @@ public class SLDPNReplayer {
 	public double replay(StochasticLabelledDataPetriNet sldpn, XTrace trace) {
 		
 		StochasticLabelledDataPetriNetSemantics semantics = sldpn.getDefaultSemantics();
+
 		DataStateLogAdapter adapter = new DataStateLogAdapterImpl(semantics);
-		
-		Map<String, Integer> transitionIndicies = new HashMap<>();
-		for (int i = 0; i < sldpn.getNumberOfTransitions(); i++) {
-			transitionIndicies.put(sldpn.getTransitionLabel(i), i);
-		}
+		Map<String, Integer> transitionIndicies = SLDPNReplayUtils.buildTransitionMap(sldpn);
 		
 		double sumOfWeights = 0.0; 
 		

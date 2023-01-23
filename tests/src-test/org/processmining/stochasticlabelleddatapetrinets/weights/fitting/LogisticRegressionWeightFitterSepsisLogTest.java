@@ -6,6 +6,7 @@ import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.InductiveMiner.efficienttree.EfficientTreeReduce.ReductionFailedException;
 import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeException;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
@@ -31,6 +32,10 @@ public class LogisticRegressionWeightFitterSepsisLogTest {
 
 		StochasticLabelledDataPetriNet net = SepsisTestLog.buildSepsisBaseModel();
 		XLog log = SepsisTestLog.loadSepsisLog();
+		
+		System.out.println(XUtils.getEventAttributeKeys(log));
+		
+		
 		
 		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		

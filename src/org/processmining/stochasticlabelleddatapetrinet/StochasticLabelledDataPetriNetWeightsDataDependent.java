@@ -12,8 +12,7 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 public class StochasticLabelledDataPetriNetWeightsDataDependent extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {
 
-	private List<WeightFunction> transitionWeights = new ArrayList<>();
-	
+	private final List<WeightFunction> transitionWeights = new ArrayList<>();
 	
 	/**
 	 * Copy from existing SLDPN
@@ -26,6 +25,57 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent extends Stochast
 			transitionWeights.add(new ConstantWeightFunction());
 		}
 	}
+	
+	/**
+	 * Copy from existing SLDPN with changed data perspective
+	 * 
+	 * @param sldpn
+	 * @param variableLabels
+	 * @param variableTypes
+	 * @param transitionReadVariables
+	 * @param transitionWriteVariables
+	 */
+	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet sldpn,
+			List<String> variableLabels, List<VariableType> variableTypes, 
+			List<int[]> transitionReadVariables, List<int[]> transitionWriteVariables) {
+		super(new SLPN() {
+
+			public int isInInitialMarking(int place) {
+				return sldpn.isInInitialMarking(place);
+			}
+
+			public String getTransitionLabel(int transition) {
+				return sldpn.getTransitionLabel(transition);
+			}
+
+			public int[] getOutputTransitions(int place) {
+				return sldpn.getOutputTransitions(place);
+			}
+
+			public int[] getOutputPlaces(int transition) {
+				return sldpn.getOutputPlaces(transition);
+			}
+
+			public int getNumberOfTransitions() {
+				return sldpn.getNumberOfTransitions();
+			}
+
+			public int getNumberOfPlaces() {
+				return sldpn.getNumberOfPlaces();
+			}
+
+			public int[] getInputTransitions(int place) {
+				return sldpn.getInputTransitions(place);
+			}
+
+			public int[] getInputPlaces(int transition) {
+				return sldpn.getInputPlaces(transition);
+			}
+		}, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);		
+		for (int i = 0; i < getNumberOfTransitions(); i++) {
+			transitionWeights.add(new ConstantWeightFunction());
+		}
+	}	
 
 	/**
 	 * 
@@ -38,8 +88,8 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent extends Stochast
 	 * @param transitionWriteVariables
 	 */
 	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledPetriNet slpn,
-			List<String> variableLabels, List<VariableType> variableTypes, List<int[]> transitionReadVariables,
-			List<int[]> transitionWriteVariables) {
+			List<String> variableLabels, List<VariableType> variableTypes, 
+			List<int[]> transitionReadVariables, List<int[]> transitionWriteVariables) {
 		super(slpn, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);
 		for (int i = 0; i < getNumberOfTransitions(); i++) {
 			transitionWeights.add(new ConstantWeightFunction());

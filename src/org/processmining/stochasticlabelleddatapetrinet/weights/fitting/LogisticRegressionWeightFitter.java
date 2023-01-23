@@ -153,7 +153,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		for (int i = 0; i < net.getNumberOfVariables(); i++) {
 			VariableType variableType = net.getVariableType(i);
 			variableTypes.put(net.getVariableLabel(i), variableType);
-			variableClasses.put(net.getVariableLabel(i), typeToClass(variableType));
+			variableClasses.put(net.getVariableLabel(i), variableType.getJavaClass());
 		}
 
 		return new ObservationInstanceBuilder(net, alignIter, initialValues, variableClasses, variableTypes);
@@ -175,11 +175,6 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		XLog alignedLog = new BalancedDataXAlignmentPlugin().alignLog(markedPN.getNet(), log, config);
 		Iterable<XAlignment> alignIter = XAlignmentExtension.instance().extendLog(alignedLog);
 		return alignIter;
-	}
-
-	private Class<?> typeToClass(VariableType variableType) {
-		//TODO
-		return Double.class;
 	}
 
 	protected BalancedProcessorConfiguration configureAlignment(XLog log, PetrinetMarkedWithMappings markedPN) {

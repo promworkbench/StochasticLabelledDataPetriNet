@@ -11,7 +11,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 
 public abstract class StochasticLabelledDataPetriNetImpl implements StochasticLabelledDataPetriNet {
 
-	private interface SLPN {
+	protected interface SLPN {
 
 		int getNumberOfTransitions();
 
