@@ -3,12 +3,18 @@ package org.processmining.stochasticlabelleddatapetrinet.pnadapater;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
+import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetImpl;
 import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataIndependent;
+import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsEditable;
+import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsImpl;
 
 public class PetrinetConverter {
 	
@@ -29,11 +35,16 @@ public class PetrinetConverter {
 		PetrinetImpl pn = new PetrinetImpl("Converted from " + sldpn.toString());
 		Map<Integer, String> conversionMap = new HashMap<>();
 		
-		Transition[] transitions = new Transition[sldpn.getNumberOfPlaces()];
+		Transition[] transitions = new Transition[sldpn.getNumberOfTransitions()];
 		Place[] places = new Place[sldpn.getNumberOfPlaces()];
 		
 		for (int i = 0; i < sldpn.getNumberOfTransitions(); i++) {
-			transitions[i] = pn.addTransition(sldpn.getTransitionLabel(i));
+			if (sldpn.isTransitionSilent(i)) {
+				transitions[i] = pn.addTransition("tau"+i);
+				transitions[i].setInvisible(true);
+			} else {
+				transitions[i] = pn.addTransition(sldpn.getTransitionLabel(i));
+			}
 			conversionMap.put(i, transitions[i].getLocalID().toString());
 		}
 		
@@ -76,6 +87,44 @@ public class PetrinetConverter {
 				return conversionMap;
 			}
 		};
+	}
+	
+	public static StochasticLabelledDataPetriNet viewAsSLDPN(AcceptingPetriNet acceptingPN) {
+		
+		StochasticLabelledPetriNetSimpleWeightsEditable slpn = new StochasticLabelledPetriNetSimpleWeightsImpl();
+
+		Petrinet net = acceptingPN.getNet();
+		
+		Map<Place, Integer> placeIdx = new HashMap<>();
+		Map<Transition, Integer> transitionIdx = new HashMap<>();
+		
+		for (Place p: net.getPlaces()) {
+			int idx = slpn.addPlace();
+			Integer tokens = acceptingPN.getInitialMarking().occurrences(p);
+			if (tokens > 0) {
+				slpn.addPlaceToInitialMarking(idx, tokens);
+			}
+			placeIdx.put(p, idx);
+		}
+		
+		for (Transition t: net.getTransitions()) {
+			int idx = slpn.addTransition(0);
+			transitionIdx.put(t, idx);
+			
+			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e: net.getOutEdges(t)) {
+				slpn.addTransitionPlaceArc(idx, placeIdx.get(e.getTarget()));
+			}
+			
+			for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e: net.getInEdges(t)) {
+				slpn.addPlaceTransitionArc(placeIdx.get(e.getSource()), idx);
+			}
+			
+			if (!t.isInvisible()) {
+				slpn.setTransitionLabel(idx, t.getLabel());
+			}
+		}
+		
+		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
 	}
 
 }

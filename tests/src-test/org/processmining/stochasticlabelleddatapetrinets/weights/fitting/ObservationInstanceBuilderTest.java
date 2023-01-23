@@ -27,7 +27,7 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.Observat
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.ProjectedEvent;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.ProjectedLog;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
-import org.processmining.stochasticlabelleddatapetrinets.TestUtils;
+import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
@@ -53,8 +53,8 @@ public class ObservationInstanceBuilderTest {
 	@Test
 	public void testBuildFromFittingLog() throws ControlFlowAlignmentException, DataAlignmentException {
 		
-		StochasticLabelledDataPetriNet net = TestUtils.buildDataWeightTestModel();
-		XLog log = TestUtils.buildTestLog();
+		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeightTestModel();
+		XLog log = SimpleTestLog.buildTestLog();
 		
 		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net);					
 		

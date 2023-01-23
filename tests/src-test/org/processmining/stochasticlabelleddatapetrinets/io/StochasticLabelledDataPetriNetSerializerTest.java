@@ -14,13 +14,13 @@ import org.junit.Test;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
-import org.processmining.stochasticlabelleddatapetrinets.TestUtils;
+import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
 
 public class StochasticLabelledDataPetriNetSerializerTest {
 	
 	@Test
 	public void testWriteSLDPN() throws IOException {
-		StochasticLabelledDataPetriNetWeightsDataDependent net = TestUtils.buildDataWeight2VariablesTestModel();
+		StochasticLabelledDataPetriNetWeightsDataDependent net = SimpleTestLog.buildDataWeight2VariablesTestModel();
 		
 		StochasticLabelledDataPetriNetSerializer serializer = new StochasticLabelledDataPetriNetSerializer();
 		
@@ -38,7 +38,7 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 	
 	@Test
 	public void testWriteReadSLDPN() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		StochasticLabelledDataPetriNetWeightsDataDependent net = TestUtils.buildDataWeight2VariablesTestModel();
+		StochasticLabelledDataPetriNetWeightsDataDependent net = SimpleTestLog.buildDataWeight2VariablesTestModel();
 		
 		StochasticLabelledDataPetriNetSerializer serializer = new StochasticLabelledDataPetriNetSerializer();
 		

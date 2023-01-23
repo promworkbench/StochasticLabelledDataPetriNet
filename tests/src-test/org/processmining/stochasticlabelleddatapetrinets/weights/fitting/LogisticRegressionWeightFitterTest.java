@@ -13,7 +13,7 @@ import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.LogisticRegressionWeightFitter;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.WeightFitterException;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
-import org.processmining.stochasticlabelleddatapetrinets.TestUtils;
+import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
 
 public class LogisticRegressionWeightFitterTest {
 	
@@ -30,8 +30,8 @@ public class LogisticRegressionWeightFitterTest {
 	@Test
 	public void weightFittingSingleVariableTest() throws WeightFitterException {
 		
-		StochasticLabelledDataPetriNet net = TestUtils.buildDataWeightTestModel();
-		XLog log = TestUtils.buildTestLog();
+		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeightTestModel();
+		XLog log = SimpleTestLog.buildTestLog();
 		
 		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		
@@ -44,8 +44,8 @@ public class LogisticRegressionWeightFitterTest {
 	@Test
 	public void weightFittingTwoVariablesTest() throws WeightFitterException {
 		
-		StochasticLabelledDataPetriNet net = TestUtils.buildDataWeight2VariablesTestModel();
-		XLog log = TestUtils.buildTestLog2Variables();
+		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeight2VariablesTestModel();
+		XLog log = SimpleTestLog.buildTestLog2Variables();
 		
 		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		

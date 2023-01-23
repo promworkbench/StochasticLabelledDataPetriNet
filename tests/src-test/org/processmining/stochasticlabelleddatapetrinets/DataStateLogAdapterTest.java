@@ -12,10 +12,10 @@ public class DataStateLogAdapterTest {
 	
 	@Test
 	public void testFromEvent() {
-		StochasticLabelledDataPetriNet net = TestUtils.buildDataWeightTestModel();
+		StochasticLabelledDataPetriNet net = SimpleTestLog.buildDataWeightTestModel();
 		DataStateLogAdapter adapter = new DataStateLogAdapterImpl(net.getDefaultSemantics());
 		
-		DataState ds = adapter.fromEvent(TestUtils.buildTestLog().get(0).get(0));
+		DataState ds = adapter.fromEvent(SimpleTestLog.buildTestLog().get(0).get(0));
 		
 		assertEquals(ds.getDouble(0), 10.0, 0.001);
 	}

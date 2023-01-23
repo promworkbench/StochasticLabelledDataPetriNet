@@ -12,7 +12,7 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.DirectDataWeight
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsEditable;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsImpl;
 
-public class TestUtils {
+public class SimpleTestLog {
 
 	public static XLog buildTestLog() {
 		final XLog log = XLogBuilder.newInstance()
@@ -36,9 +36,10 @@ public class TestUtils {
 					.addEvent("A").addAttribute("X", 5.0).addAttribute("Y", -5.0)
 					.addEvent("C").build();	
 		return log;
-	}	
+	}
+	
 
-	static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
+	private static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
 		// Simple XOR net
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = new StochasticLabelledPetriNetSimpleWeightsImpl();
 		
@@ -64,7 +65,7 @@ public class TestUtils {
 		return slpn;
 	}
 
-	static StochasticLabelledDataPetriNetWeightsDataIndependent buildConstantWeightTestModel() {		
+	public static StochasticLabelledDataPetriNetWeightsDataIndependent buildConstantWeightTestModel() {		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();		
 		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
 	}
@@ -93,7 +94,7 @@ public class TestUtils {
 		return sldpn;
 	}
 	
-public static StochasticLabelledDataPetriNetWeightsDataDependent buildDataWeight2VariablesTestModel() {
+	public static StochasticLabelledDataPetriNetWeightsDataDependent buildDataWeight2VariablesTestModel() {
 		
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 		
