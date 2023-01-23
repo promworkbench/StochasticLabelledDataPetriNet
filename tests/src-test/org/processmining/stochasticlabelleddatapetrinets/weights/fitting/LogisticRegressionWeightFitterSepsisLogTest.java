@@ -6,12 +6,12 @@ import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.processmining.log.utils.XUtils;
 import org.processmining.plugins.InductiveMiner.efficienttree.EfficientTreeReduce.ReductionFailedException;
 import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeException;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.LogisticRegressionWeightFitter;
+import org.processmining.stochasticlabelleddatapetrinet.weights.writeops.AllWriteOperationMiner;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
 import org.processmining.stochasticlabelleddatapetrinets.SepsisTestLog;
 
@@ -28,14 +28,14 @@ public class LogisticRegressionWeightFitterSepsisLogTest {
 	
 	
 	@Test
-	public void weightFittingSingleVariableTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
+	public void weightFittingSepsisTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
 
 		StochasticLabelledDataPetriNet net = SepsisTestLog.buildSepsisBaseModel();
 		XLog log = SepsisTestLog.loadSepsisLog();
 		
-		System.out.println(XUtils.getEventAttributeKeys(log));
+		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);
 		
-		
+		net = writeOpMiner.extendWithWrites(net);
 		
 		LogisticRegressionWeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
 		

@@ -23,7 +23,7 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.SLDPNReplayUtils;
 import org.python.google.common.collect.Sets;
 
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
@@ -54,7 +54,7 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 		Map<String, Class<?>> numericVars = Maps.filterValues(vars, clazz -> clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(Long.class));
 		
 		List<String> variableLabels = numericVars.keySet().stream()
-				.filter(s -> excludedAttributes.contains(s))
+				.filter(s -> !excludedAttributes.contains(s))
 				.toList();
 		Map<String, Integer> variableIndicies = toIndexMap(variableLabels);
 		
@@ -64,7 +64,7 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 				.toList();
 		
 		Map<String, Integer> transitionMap = SLDPNReplayUtils.buildTransitionMap(net);
-		Multimap<Integer, Integer> writes = ArrayListMultimap.create();
+		Multimap<Integer, Integer> writes = HashMultimap.create(); //TODO use multiset of counting
 		
 		for (XTrace t: log) {
 			for (XEvent e: t) {
@@ -91,7 +91,8 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 			varWrites.add(observedWrites.stream().mapToInt(idx->idx).sorted().toArray()); //TODO not sure if it should/needs to be be sorted
 		}
 		
-		return new StochasticLabelledDataPetriNetWeightsDataDependent(net, variableLabels, variableTypes, 
+		return new StochasticLabelledDataPetriNetWeightsDataDependent(net, 
+				variableLabels, variableTypes, 
 				varReads, varWrites);
 	}
 
