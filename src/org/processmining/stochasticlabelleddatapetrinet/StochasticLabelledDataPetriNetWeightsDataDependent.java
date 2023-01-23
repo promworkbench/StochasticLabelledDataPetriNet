@@ -5,29 +5,29 @@ import java.util.List;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFactoryImpl;
+import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializer;
 import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
-public class StochasticLabelledDataPetriNetWeightsDataDependent
-		extends StochasticLabelledDataPetriNetImpl<StochasticLabelledDataPetriNetWeightsDataDependent>
-		implements StochasticLabelledDataPetriNetWeights<StochasticLabelledDataPetriNetWeightsDataDependent> {
+public class StochasticLabelledDataPetriNetWeightsDataDependent extends StochasticLabelledDataPetriNetImpl
+		implements StochasticLabelledDataPetriNetWeights {
 
 	private final List<WeightFunction> transitionWeights = new ArrayList<>();
-
+	
 	/**
 	 * Copy from existing SLDPN
 	 * 
 	 * @param sldpn
 	 */
-	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet<?> sldpn) {
+	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet sldpn) {
 		super(sldpn);
 		for (int i = 0; i < getNumberOfTransitions(); i++) {
 			transitionWeights.add(new ConstantWeightFunction());
 		}
 	}
-
+	
 	/**
 	 * Copy from existing SLDPN with changed data perspective
 	 * 
@@ -37,9 +37,9 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent
 	 * @param transitionReadVariables
 	 * @param transitionWriteVariables
 	 */
-	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet<?> sldpn,
-			List<String> variableLabels, List<VariableType> variableTypes, List<int[]> transitionReadVariables,
-			List<int[]> transitionWriteVariables) {
+	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledDataPetriNet sldpn,
+			List<String> variableLabels, List<VariableType> variableTypes, 
+			List<int[]> transitionReadVariables, List<int[]> transitionWriteVariables) {
 		super(new SLPN() {
 
 			public int isInInitialMarking(int place) {
@@ -73,11 +73,11 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent
 			public int[] getInputPlaces(int transition) {
 				return sldpn.getInputPlaces(transition);
 			}
-		}, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);
+		}, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);		
 		for (int i = 0; i < getNumberOfTransitions(); i++) {
 			transitionWeights.add(new ConstantWeightFunction());
 		}
-	}
+	}	
 
 	/**
 	 * 
@@ -90,8 +90,8 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent
 	 * @param transitionWriteVariables
 	 */
 	public StochasticLabelledDataPetriNetWeightsDataDependent(StochasticLabelledPetriNet slpn,
-			List<String> variableLabels, List<VariableType> variableTypes, List<int[]> transitionReadVariables,
-			List<int[]> transitionWriteVariables) {
+			List<String> variableLabels, List<VariableType> variableTypes, 
+			List<int[]> transitionReadVariables, List<int[]> transitionWriteVariables) {
 		super(slpn, variableLabels, variableTypes, transitionReadVariables, transitionWriteVariables);
 		for (int i = 0; i < getNumberOfTransitions(); i++) {
 			transitionWeights.add(new ConstantWeightFunction());
@@ -100,11 +100,11 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent
 
 	public void setWeightFunction(int transition, WeightFunction function) {
 		transitionWeights.set(transition, function);
-	}
-
+	}	
+	
 	public WeightFunction getWeightFunction(int transition) {
 		return transitionWeights.get(transition);
-	}
+	}		
 
 	@Override
 	public double getTransitionWeight(int transition, DataState dataState) {
@@ -114,10 +114,10 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent
 	@Override
 	public StochasticLabelledDataPetriNetSemantics getDefaultSemantics() {
 		return new StochasticLabelledDataPetriNetSemanticsWeightsImpl(this,
-				new DataStateFactoryImpl(getNumberOfVariables()));
+				new DataStateFactoryImpl(getNumberOfVariables())); 
 	}
 
-	public StochasticLabelledDataPetriNetSerializerImpl getDefaultSerializer() {
+	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer() {
 		return new StochasticLabelledDataPetriNetSerializerImpl();
 	}
 

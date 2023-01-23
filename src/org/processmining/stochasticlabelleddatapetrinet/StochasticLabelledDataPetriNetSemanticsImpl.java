@@ -11,7 +11,7 @@ import org.python.bouncycastle.util.Arrays;
 
 public abstract class StochasticLabelledDataPetriNetSemanticsImpl implements StochasticLabelledDataPetriNetSemantics {
 
-	private StochasticLabelledDataPetriNet<?> net;
+	private StochasticLabelledDataPetriNet net;
 	private DataStateFactory dataStateFactory;
 
 	private byte[] state;
@@ -24,7 +24,7 @@ public abstract class StochasticLabelledDataPetriNetSemanticsImpl implements Sto
 	protected BitSet enabledTransitions;
 	protected int numberOfEnabledTransitions;
 
-	public StochasticLabelledDataPetriNetSemanticsImpl(StochasticLabelledDataPetriNet<?> net,
+	public StochasticLabelledDataPetriNetSemanticsImpl(StochasticLabelledDataPetriNet net,
 			DataStateFactory dataStateFactory) {
 		this.net = net;
 		this.dataStateFactory = dataStateFactory;

@@ -4,9 +4,9 @@ import org.processmining.stochasticlabelleddatapetrinet.datastate.DataStateFacto
 
 public class StochasticLabelledDataPetriNetSemanticsWeightsImpl extends StochasticLabelledDataPetriNetSemanticsImpl {
 
-	private StochasticLabelledDataPetriNetWeights<?> net;
+	private StochasticLabelledDataPetriNetWeights net;
 
-	public StochasticLabelledDataPetriNetSemanticsWeightsImpl(StochasticLabelledDataPetriNetWeights<?> net, DataStateFactory dataStateFactory) {
+	public StochasticLabelledDataPetriNetSemanticsWeightsImpl(StochasticLabelledDataPetriNetWeights net, DataStateFactory dataStateFactory) {
 		super(net, dataStateFactory);
 		this.net = net;
 	}

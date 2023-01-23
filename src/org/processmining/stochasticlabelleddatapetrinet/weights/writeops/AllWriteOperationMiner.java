@@ -48,7 +48,7 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 		this.classifier = classifier;
 	}
 
-	public StochasticLabelledDataPetriNetWeightsDataDependent extendWithWrites(StochasticLabelledDataPetriNet<?> net) {
+	public StochasticLabelledDataPetriNet extendWithWrites(StochasticLabelledDataPetriNet net) {
 		
 		Map<String, Class<?>> vars = XUtils.getEventAttributeTypes(log);
 		Map<String, Class<?>> numericVars = Maps.filterValues(vars, clazz -> clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(Long.class));

@@ -9,9 +9,8 @@ import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDat
  * 
  * @author Felix Mannhardt
  * @author Sander Leemans
- * @param <T>
  */
-public interface StochasticLabelledDataPetriNet<T extends StochasticLabelledDataPetriNet<T>> {
+public interface StochasticLabelledDataPetriNet {
 
 	public enum VariableType {
 		CONTINUOUS(Double.class), DISCRETE(Long.class), CATEGORICAL(String.class);
@@ -148,7 +147,7 @@ public interface StochasticLabelledDataPetriNet<T extends StochasticLabelledData
 	 *         for each call.
 	 */
 	public StochasticLabelledDataPetriNetSemantics getDefaultSemantics();
-
-	public StochasticLabelledDataPetriNetSerializer<T> getDefaultSerializer();
-
+	
+	public StochasticLabelledDataPetriNetSerializer getDefaultSerializer();
+	
 }

@@ -4,9 +4,9 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 
-public interface WeightFitter<T extends StochasticLabelledDataPetriNetWeights<T>> {
+public interface WeightFitter {
 
-	StochasticLabelledDataPetriNetWeights<T> fit(XLog log, StochasticLabelledDataPetriNet<?> sldpn)
+	StochasticLabelledDataPetriNetWeights fit(XLog log, StochasticLabelledDataPetriNet sldpn)
 			throws WeightFitterException;
 
 }

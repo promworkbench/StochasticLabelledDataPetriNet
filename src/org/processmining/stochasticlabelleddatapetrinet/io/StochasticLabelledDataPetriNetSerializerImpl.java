@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
@@ -24,7 +25,7 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetS
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticLabelledDataPetriNetSerializer<StochasticLabelledDataPetriNetWeightsDataDependent> {
+public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticLabelledDataPetriNetSerializer {
 
 	private static final int VERSION = 1;
 
@@ -39,7 +40,12 @@ public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticL
 					LogisticWeightFunction.class, 4));
 
 	@Override
-	public void serialize(StochasticLabelledDataPetriNetWeightsDataDependent net, OutputStream os) throws IOException {
+	public void serialize(StochasticLabelledDataPetriNet sldpn, OutputStream os) throws IOException {
+		
+		if (!(sldpn instanceof StochasticLabelledDataPetriNetWeightsDataDependent)) {
+			throw new RuntimeException("Invalid class");
+		}
+		StochasticLabelledDataPetriNetWeightsDataDependent net = (StochasticLabelledDataPetriNetWeightsDataDependent) sldpn;
 		
 		DataOutputStream dos = new DataOutputStream(os);
 		
@@ -103,7 +109,7 @@ public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticL
 	}
 
 	@Override
-	public StochasticLabelledDataPetriNetWeightsDataDependent deserialize(InputStream is)
+	public StochasticLabelledDataPetriNet deserialize(InputStream is)
 			throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 
