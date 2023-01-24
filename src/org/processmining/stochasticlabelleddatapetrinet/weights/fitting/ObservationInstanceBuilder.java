@@ -338,7 +338,7 @@ public class ObservationInstanceBuilder {
 			Attribute attr = null;
 			
 			String attributeKey = entry.getKey();
-			Integer attributeIndex = attributeIndexMap.get(attributeKey);
+			Integer attributeIndex = attributeIndexMap.get(WekaUtil.wekaUnescape(attributeKey));
 			if (attributeIndex == null) {
 				throw new RuntimeException("Unknown attribute " + attributeKey);
 			}
@@ -351,18 +351,21 @@ public class ObservationInstanceBuilder {
 			if (value == null) {
 				// NULL means there is a missing value for this attribute
 				instance.setMissing(attr);
-			} else if (value instanceof Number && (attributeTypeMap.get(attributeKey) == VariableType.DISCRETE
-					|| attributeTypeMap.get(attributeKey) == VariableType.CONTINUOUS))
-				instance.setValue(attr, ((Number) value).doubleValue());
-			else if (value instanceof Boolean && attributeTypeMap.get(attributeKey) == VariableType.CATEGORICAL) {
-				if (((Boolean) value).booleanValue())
-					instance.setValue(attr, 1);
-				else
-					instance.setValue(attr, 0);
-			} else if (value instanceof String && attributeTypeMap.get(attributeKey) == VariableType.CATEGORICAL) {
-				throw new UnsupportedOperationException("String variables not yet supported");
 			} else {
-				System.out.println("Skipped variable " + attributeKey + " with value " + entry.getValue());
+				VariableType variableType = attributeTypeMap.get(WekaUtil.wekaUnescape(attributeKey));
+				if (value instanceof Number && (variableType == VariableType.DISCRETE
+						|| variableType == VariableType.CONTINUOUS))
+					instance.setValue(attr, ((Number) value).doubleValue());
+				else if (value instanceof Boolean && variableType == VariableType.CATEGORICAL) {
+					if (((Boolean) value).booleanValue())
+						instance.setValue(attr, 1);
+					else
+						instance.setValue(attr, 0);
+				} else if (value instanceof String && variableType == VariableType.CATEGORICAL) {
+					throw new UnsupportedOperationException("String variables not yet supported");
+				} else {
+					System.out.println("Skipped variable " + attributeKey + " with value " + entry.getValue());
+				}
 			}
 		}
 		return instance;
