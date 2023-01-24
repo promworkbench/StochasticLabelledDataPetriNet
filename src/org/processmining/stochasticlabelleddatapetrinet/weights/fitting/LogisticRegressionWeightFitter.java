@@ -107,6 +107,8 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 				Instances wekaInstances = builder.buildInstances(tIdx, instancesMultimap);
 				
+				System.out.println(String.format("WeightFitter: Building logistic model from %.0f instances",  wekaInstances.sumOfWeights()));
+				
 				// We need samples for both cases to infer a meaningful function
 				if (wekaInstances.numDistinctValues(0) > 1) {
 					try {
@@ -117,9 +119,9 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 							Evaluation eval = new weka.classifiers.evaluation.Evaluation(wekaInstances);
 							eval.evaluateModel(logistic, wekaInstances);
 							evaluations.put(tIdx, eval);
-							System.out.println(String.format("%s (%s): f1: %.4f, prc: %.4f, distribution: %.0f, %.0f", 
+							System.out.println(String.format("%s (%s): roc: %.4f, prc: %.4f, MAE: %.4f, distribution: %.0f, %.0f", 
 									tIdx, net.getTransitionLabel(tIdx),
-									eval.fMeasure(0), eval.areaUnderPRC(0), 
+									eval.areaUnderROC(0), eval.areaUnderPRC(0), eval.meanAbsoluteError(), 
 									eval.getClassPriors()[0], eval.getClassPriors()[1]));
 						}
 

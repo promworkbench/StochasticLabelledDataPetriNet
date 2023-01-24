@@ -63,6 +63,8 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 				.map(varLabel -> VariableType.fromClass(vars.get(varLabel)))
 				.toList();
 		
+		System.out.println("WriteOperationMiner: Considering attributes " + variableLabels);
+		
 		Map<String, Integer> transitionMap = SLDPNReplayUtils.buildTransitionMap(net);
 		Multimap<Integer, Integer> writes = HashMultimap.create(); //TODO use multiset of counting
 		

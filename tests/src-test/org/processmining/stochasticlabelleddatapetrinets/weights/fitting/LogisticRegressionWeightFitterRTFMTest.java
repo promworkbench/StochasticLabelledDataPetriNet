@@ -36,7 +36,7 @@ public class LogisticRegressionWeightFitterRTFMTest {
 	
 	
 	@Test
-	public void weightFittingSepsisTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
+	public void weightFittingRTFMTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
 		
 		try (InputStream rtfmModel = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz-IMf.apnml");
 			 InputStream rtfmLog = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz1.xes.gz")) {
