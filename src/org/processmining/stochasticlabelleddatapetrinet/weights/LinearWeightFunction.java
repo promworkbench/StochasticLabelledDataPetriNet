@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Objects;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
@@ -13,8 +15,8 @@ public class LinearWeightFunction implements SerializableWeightFunction  {
 	private double[] coefficients;
 	private double intercept;
 	
-	LinearWeightFunction() {
-		super(); // for deserialization
+	public LinearWeightFunction() {
+		super(); // for deserialization, needs to be public to be accessible by serializer
 	}
 	
 	public LinearWeightFunction(double intercept, double[] coefficients) {
@@ -54,6 +56,30 @@ public class LinearWeightFunction implements SerializableWeightFunction  {
 		for (int i = 0; i < coefficients.length; i++) {
 			coefficients[i] = dis.readDouble();
 		}
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(coefficients);
+		result = prime * result + Objects.hash(intercept);
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LinearWeightFunction other = (LinearWeightFunction) obj;
+		return Arrays.equals(coefficients, other.coefficients)
+				&& Double.doubleToLongBits(intercept) == Double.doubleToLongBits(other.intercept);
+	}
+
+	public String toString() {
+		return "LinearWeightFunction [coefficients=" + Arrays.toString(coefficients) + ", intercept=" + intercept + "]";
 	}	
 
 }

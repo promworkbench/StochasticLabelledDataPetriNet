@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
@@ -42,5 +43,24 @@ public class ConstantWeightFunction implements SerializableWeightFunction {
 		DataInputStream dis = new DataInputStream(is);
 		dis.readInt();
 		weight = dis.readDouble();
+	}
+
+	public int hashCode() {
+		return Objects.hash(weight);
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConstantWeightFunction other = (ConstantWeightFunction) obj;
+		return Double.doubleToLongBits(weight) == Double.doubleToLongBits(other.weight);
+	}
+
+	public String toString() {
+		return "ConstantWeightFunction with weight + weight";
 	}
 }

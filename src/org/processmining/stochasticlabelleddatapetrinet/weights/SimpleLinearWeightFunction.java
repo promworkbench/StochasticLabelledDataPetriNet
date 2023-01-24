@@ -2,6 +2,10 @@ package org.processmining.stochasticlabelleddatapetrinet.weights;
 
 public class SimpleLinearWeightFunction extends LinearWeightFunction {
 
+	public SimpleLinearWeightFunction() {
+		super(); // for deserialization, needs to be public to be accessible by serializer
+	}
+
 	/**
 	 * Weight function for a linear weight function based on a single variable
 	 * 

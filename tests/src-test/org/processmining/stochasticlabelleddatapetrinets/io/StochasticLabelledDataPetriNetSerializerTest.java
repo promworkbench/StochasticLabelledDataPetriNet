@@ -3,6 +3,7 @@ package org.processmining.stochasticlabelleddatapetrinets.io;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 
+import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.junit.Test;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
@@ -21,6 +23,8 @@ import org.processmining.log.utils.XUtils;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter;
+import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.LogisticRegressionWeightFitter;
+import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.WeightFitter;
 import org.processmining.stochasticlabelleddatapetrinet.weights.writeops.AllWriteOperationMiner;
 import org.processmining.stochasticlabelleddatapetrinets.FakeContext;
 import org.processmining.stochasticlabelleddatapetrinets.SepsisTestLog;
@@ -61,6 +65,8 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 				StochasticLabelledDataPetriNet sldpn = net.getDefaultSerializer().deserialize(fos);
 				assertNotNull(sldpn);
 				assertEqualSLDPN(net, sldpn);
+				assertTrue(sldpn instanceof StochasticLabelledDataPetriNetWeightsDataDependent);
+				assertEqualSLDPNWeights(net, (StochasticLabelledDataPetriNetWeightsDataDependent) sldpn);
 			}
 
 		} finally {
@@ -74,9 +80,12 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 		
 		StochasticLabelledDataPetriNet net = SepsisTestLog.buildSepsisBaseModel();
 		XLog log = SepsisTestLog.loadSepsisLog();
-		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);
 		
+		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);
 		net = writeOpMiner.extendWithWrites(net);
+		
+		WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+		net = fitter.fit(log, net);
 		
 		Path tempFile = Files.createTempFile("sldpntests", ".sldpn");
 	
@@ -111,8 +120,10 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 			StochasticLabelledDataPetriNet net = PetrinetConverter.viewAsSLDPN(pn);
 			
 			AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);
-			
 			net = writeOpMiner.extendWithWrites(net);
+			
+			WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+			net = fitter.fit(log, net);			
 			
 			Path tempFile = Files.createTempFile("sldpntests", ".sldpn");
 			
@@ -154,7 +165,14 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 			assertEquals(sldpn.getVariableLabel(i), net.getVariableLabel(i));
 			assertEquals(sldpn.getVariableType(i), net.getVariableType(i));
 		}
-	}	
+	}
+	
+	private void assertEqualSLDPNWeights(StochasticLabelledDataPetriNetWeightsDataDependent net,
+			StochasticLabelledDataPetriNetWeightsDataDependent sldpn) {
+		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
+			assertEquals(net.getWeightFunction(i), sldpn.getWeightFunction(i));
+		}		
+	}
 	
 
 }
