@@ -34,7 +34,7 @@ public class SimpleTestLog {
 					.addEvent("B")
 				.addTrace("t2", 20)
 					.addEvent("A").addAttribute("X", 5.0).addAttribute("Y", -5.0)
-					.addEvent("C").build();	
+					.addEvent("C").build();
 		return log;
 	}
 	

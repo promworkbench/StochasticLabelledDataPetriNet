@@ -51,7 +51,6 @@ public class StochasticLabelledDataPetriNetSerializerTest {
 				assertEquals(net.getNumberOfTransitions(), sldpn.getNumberOfTransitions());
 				assertEquals(net.getNumberOfVariables(), sldpn.getNumberOfVariables());
 				
-				//TODO check other props
 			}
 
 		} finally {

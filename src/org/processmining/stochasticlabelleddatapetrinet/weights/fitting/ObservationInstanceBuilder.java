@@ -178,7 +178,6 @@ public class ObservationInstanceBuilder {
 		return projectedLog;
 	}
 	
-	
 	public Map<Integer, Multiset<Map<String, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, 
 			Map<String, Integer> eventClass2TransIdx) {
 		

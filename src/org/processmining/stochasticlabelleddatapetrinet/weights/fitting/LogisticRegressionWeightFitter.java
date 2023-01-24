@@ -13,6 +13,7 @@ import org.processmining.plugins.balancedconformance.BalancedDataXAlignmentPlugi
 import org.processmining.plugins.balancedconformance.config.BalancedProcessorConfiguration;
 import org.processmining.plugins.balancedconformance.controlflow.ControlFlowAlignmentException;
 import org.processmining.plugins.balancedconformance.dataflow.exception.DataAlignmentException;
+import org.processmining.plugins.balancedconformance.export.XAlignmentConverter;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
@@ -76,7 +77,8 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpnWeights = new StochasticLabelledDataPetriNetWeightsDataDependent(
 				net);
 
-		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net); // this is guessing a final marking
+		// this is guessing a final marking
+		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net); 
 
 		try {
 			// using default alignment
@@ -104,13 +106,13 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 			for (int tIdx = 0; tIdx < net.getNumberOfTransitions(); tIdx++) {
 
 				Instances wekaInstances = builder.buildInstances(tIdx, instancesMultimap);
-
+				
 				// We need samples for both cases to infer a meaningful function
 				if (wekaInstances.numDistinctValues(0) > 1) {
 					try {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
 						logistic.buildClassifier(wekaInstances);
-
+						
 						if (keepEvaluation) {
 							Evaluation eval = new weka.classifiers.evaluation.Evaluation(wekaInstances);
 							eval.evaluateModel(logistic, wekaInstances);
@@ -199,7 +201,9 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 	private Iterable<XAlignment> alignLog(XLog log, PetrinetMarkedWithMappings markedPN)
 			throws ControlFlowAlignmentException, DataAlignmentException {
 		BalancedProcessorConfiguration config = configureAlignment(log, markedPN);
-		XLog alignedLog = new BalancedDataXAlignmentPlugin().alignLog(markedPN.getNet(), log, config);
+		BalancedDataXAlignmentPlugin alignmentPlugin = new BalancedDataXAlignmentPlugin();
+		alignmentPlugin.setConverter(new XAlignmentConverter()); // use plain XES 
+		XLog alignedLog = alignmentPlugin.alignLog(markedPN.getNet(), log, config);
 		Iterable<XAlignment> alignIter = XAlignmentExtension.instance().extendLog(alignedLog);
 		return alignIter;
 	}
