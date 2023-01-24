@@ -1,5 +1,6 @@
 package org.processmining.stochasticlabelleddatapetrinet.weights.fitting;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -132,13 +133,16 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 						double[] weightCoeff = new double[net.getNumberOfVariables()];
 
+						Instances internalInstances = getInternalFilteredInstances(logistic);
+						
 						// skip class attribute, which is first by convention!
 						for (int i = 1; i < coefficients.length; i++) {
 
 							assert coefficients[i].length == 1 : "We expect coefficients to be scalars";
-							assert wekaInstances.classIndex() == 0;
+							
+							assert internalInstances.classIndex() == 0;
 
-							Attribute attr = wekaInstances.attribute(i);
+							Attribute attr = internalInstances.attribute(i);
 
 							//TODO this is still dangerous since escape<->unescape is not lossless in all cases!
 							Integer varIdxInModel = variableIdx.get(WekaUtil.wekaUnescape(attr.name()));
@@ -164,6 +168,14 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		}
 
 		return sldpnWeights;
+	}
+
+	private Instances getInternalFilteredInstances(Logistic logistic) throws NoSuchFieldException, IllegalAccessException {
+		// This is not expose by WEKA but we need it as we need to know the mapping from coefficient to variables/attributes
+		Field f = Logistic.class.getDeclaredField("m_structure");
+		f.setAccessible(true);
+		Instances internalInstances = (Instances) f.get(logistic);
+		return internalInstances;
 	}
 
 	private Map<String, Integer> builderEventClassMapping(StochasticLabelledDataPetriNet net,

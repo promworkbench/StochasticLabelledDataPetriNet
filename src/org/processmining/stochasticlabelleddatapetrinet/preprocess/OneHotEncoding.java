@@ -2,6 +2,7 @@ package org.processmining.stochasticlabelleddatapetrinet.preprocess;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,12 +31,13 @@ public class OneHotEncoding {
 	private final Set<String> excludedAttributes;
 
 	public OneHotEncoding() {
-		this(STANDARD_EXCLUDED_ATTRIBUTES);
+		this(new HashSet<>());
 	}
 
 	public OneHotEncoding(Set<String> excludedAttributes) {
 		super();
 		this.excludedAttributes = excludedAttributes;
+		this.excludedAttributes.addAll(STANDARD_EXCLUDED_ATTRIBUTES);
 	}
 
 	public XLog process(XLog log) {
