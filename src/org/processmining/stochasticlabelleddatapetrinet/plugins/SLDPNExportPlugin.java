@@ -39,7 +39,7 @@ public class SLDPNExportPlugin {
 		{
 			ZipEntry e = new ZipEntry(FILENAME_ENCODING);
 			out.putNextEntry(e);
-			//TODO
+			sldpn.getOneHotEncoding().serialize(out);
 			out.closeEntry();
 		}
 

@@ -44,8 +44,13 @@ public class SLDPNDiscoveryPlugin {
 			throws WeightFitterException {
 		StochasticLabelledDataPetriNet dnet = PetrinetConverter.viewAsSLDPN(controlFlowModel);
 
-		OneHotEncoding OneHotEncoding = new OneHotEncoding(classifier.getDefiningAttributeKeys());
-		XLog encodedLog = OneHotEncoding.process(log);
+		OneHotEncoding oneHotEncoding = new OneHotEncoding(classifier.getDefiningAttributeKeys());
+		
+		// learn the encoding
+		oneHotEncoding.fit(log);
+		
+		// apply
+		XLog encodedLog = oneHotEncoding.process(log);
 
 		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(encodedLog);
 
@@ -55,6 +60,6 @@ public class SLDPNDiscoveryPlugin {
 
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(encodedLog, dnet);
 
-		return new SLDPN(OneHotEncoding, netWithWeights);
+		return new SLDPN(oneHotEncoding, netWithWeights);
 	}
 }

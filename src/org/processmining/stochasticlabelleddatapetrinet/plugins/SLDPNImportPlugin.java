@@ -12,6 +12,7 @@ import org.processmining.framework.abstractplugins.AbstractImportPlugin;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.io.OneHotEncodingSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.preprocess.OneHotEncoding;
 
@@ -26,7 +27,7 @@ public class SLDPNImportPlugin extends AbstractImportPlugin {
 	}
 
 	public static SLDPN read(InputStream in) throws IOException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 
 		ZipEntry ze;
@@ -38,7 +39,7 @@ public class SLDPNImportPlugin extends AbstractImportPlugin {
 			if (ze.getName().equals(SLDPNExportPlugin.FILENAME_MODEL)) {
 				model = new StochasticLabelledDataPetriNetSerializerImpl().deserialize(zis);
 			} else if (ze.getName().equals(SLDPNExportPlugin.FILENAME_ENCODING)) {
-				//TODO
+				encoding = new OneHotEncodingSerializerImpl().deserialize(zis);
 			}
 			zis.closeEntry();
 		}
