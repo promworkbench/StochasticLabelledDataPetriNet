@@ -1,6 +1,7 @@
 package org.processmining.stochasticlabelleddatapetrinet.logadapter;
 
 import org.deckfour.xes.model.XAttributable;
+import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeContinuous;
 import org.deckfour.xes.model.XAttributeDiscrete;
 import org.deckfour.xes.model.XAttributeMap;
@@ -43,22 +44,28 @@ public class DataStateLogAdapterImpl implements DataStateLogAdapter {
 		for (int i = 0; i < semantics.getNumberOfVariables(); i++) {
 			String varLabel = semantics.getVariableLabel(i);
 
-			if (attributes.containsKey(varLabel)) {
+			XAttribute a = attributes.get(varLabel);
+			if (a != null) {
 				VariableType varType = semantics.getVariableType(i);
 				switch (varType) {
 					case CONTINUOUS:
-						if (!(attributes.get(varLabel) instanceof XAttributeContinuous)) {
-							throw new RuntimeException("Invalid attribute type mapped to CONTINUOUS variable! Variable " + varLabel);
+						if (a instanceof XAttributeDiscrete) {
+							ds.putDouble(i, ((Long) XUtils.getAttributeValue(a)).doubleValue());
+						} else {
+							if (!(attributes.get(varLabel) instanceof XAttributeContinuous)) {
+								throw new RuntimeException("Invalid attribute type mapped to CONTINUOUS variable! Variable " + varLabel);
+							}
+							ds.putDouble(i, (Double) XUtils.getAttributeValue(a));							
 						}
-						ds.putDouble(i, (Double) XUtils.getAttributeValue(attributes.get(varLabel)));
 						break;
 					case DISCRETE:
-						if (!(attributes.get(varLabel) instanceof XAttributeDiscrete)) {
+						if (!(a instanceof XAttributeDiscrete)) {
 							throw new RuntimeException("Invalid attribute type mapped to DISCRETE or CATEGORICAL variable! Variable " + varLabel);
 						}
-						ds.putLong(i, (Long) XUtils.getAttributeValue(attributes.get(varLabel)));
-						break; //TODO handle string variables and variable mapping
+						ds.putLong(i, (Long) XUtils.getAttributeValue(a));
+						break; 
 					case CATEGORICAL:
+						//TODO handle string variables and variable mapping
 						throw new RuntimeException("Categorical attributes are not yet supported! Variable " + varLabel);
 					default :
 						break;
