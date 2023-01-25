@@ -28,8 +28,9 @@ public class duEMSC {
 
 		//gather data
 		int logSize = log.size();
+		int maximumTraceLength = getMaximumTraceLength(log);
 		TObjectIntMap<String[]> activitySequences = getActivitySequences(log, classifier);
-		TObjectIntMap<DataState[]> dataSequences = getDataSequences(log, logAdapter);
+		TObjectIntMap<DataState[]> dataSequences = getDataSequences(log, logAdapter, maximumTraceLength);
 
 		BigDecimal sum = BigDecimal.ZERO;
 
@@ -43,7 +44,7 @@ public class duEMSC {
 
 			BigDecimal activitySequenceProbabilityModel = queryModelForTrace(semantics, canceller, mc, activitySequence,
 					dataSequences, logSize);
-			
+
 			BigDecimal difference = activitySequenceProbabilityLog.subtract(activitySequenceProbabilityModel)
 					.max(BigDecimal.ZERO);
 
@@ -73,12 +74,12 @@ public class duEMSC {
 					TraceProbablility.getTraceProbability(semantics, activitySequence, dataSequence, canceller));
 
 			sum = sum.add(probabilityConditionalModel.multiply(dataSequenceProbabilityLog));
-			
-//			System.out.println("    trace+data done");
+
+			//			System.out.println("    trace+data done");
 		}
-		
-//		System.out.println("  trace done");
-		
+
+		//		System.out.println("  trace done");
+
 		//		TObjectIntIterator<DataState[]> it = dataSequences.iterator();
 		//		it.advance();
 		//		CrossProductResultDot result2 = new CrossProductResultDot();
@@ -87,6 +88,14 @@ public class duEMSC {
 		//		System.out.println(result2.toDot());
 
 		return sum;
+	}
+
+	public static int getMaximumTraceLength(XLog log) {
+		int max = 0;
+		for (XTrace trace : log) {
+			max = Math.max(max, trace.size());
+		}
+		return max;
 	}
 
 	public static TObjectIntMap<String[]> getActivitySequences(XLog log, XEventClassifier classifier) {
@@ -108,7 +117,8 @@ public class duEMSC {
 		return activitySequences;
 	}
 
-	public static TObjectIntMap<DataState[]> getDataSequences(XLog log, DataStateLogAdapter logAdapter) {
+	public static TObjectIntMap<DataState[]> getDataSequences(XLog log, DataStateLogAdapter logAdapter,
+			int maxTraceLength) {
 		TObjectIntMap<DataState[]> dataSequences = new TObjectIntCustomHashMap<>(new HashingStrategy<DataState[]>() {
 			private static final long serialVersionUID = 1L;
 
@@ -122,7 +132,7 @@ public class duEMSC {
 		});
 		for (XTrace trace : log) {
 
-			DataState[] dataTrace = TraceProbablility.getDataSequence(trace, logAdapter);
+			DataState[] dataTrace = TraceProbablility.getDataSequence(trace, logAdapter, maxTraceLength);
 			dataSequences.adjustOrPutValue(dataTrace, 1, 1);
 		}
 		return dataSequences;

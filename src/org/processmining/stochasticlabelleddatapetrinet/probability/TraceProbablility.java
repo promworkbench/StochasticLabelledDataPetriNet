@@ -7,22 +7,11 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
-import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapterImpl;
 import org.processmining.stochasticlabelledpetrinets.probability.CrossProductResultSolver;
 
 import lpsolve.LpSolveException;
 
 public class TraceProbablility {
-
-	public static double getConditionalTraceProbability(StochasticLabelledDataPetriNetSemantics semantics, XTrace trace,
-			XEventClassifier classifier, ProMCanceller canceller) throws LpSolveException {
-		DataStateLogAdapter logAdapter = new DataStateLogAdapterImpl(semantics);
-
-		String[] activitySequence = getActivitySequence(trace, classifier);
-		DataState[] dataSequence = getDataSequence(trace, logAdapter);
-
-		return getTraceProbability(semantics, activitySequence, dataSequence, canceller);
-	}
 
 	public static double getTraceProbability(StochasticLabelledDataPetriNetSemantics semantics,
 			String[] activitySequence, DataState[] dataSequence, ProMCanceller canceller) throws LpSolveException {
@@ -45,18 +34,22 @@ public class TraceProbablility {
 		return activityTrace;
 	}
 
-	public static DataState[] getDataSequence(XTrace trace, DataStateLogAdapter logAdapter) {
-		DataState[] dataTrace = new DataState[trace.size()];
+	public static DataState[] getDataSequence(XTrace trace, DataStateLogAdapter logAdapter, int minimumTraceLength) {
+		DataState[] dataTrace = new DataState[Math.max(trace.size() + 1, minimumTraceLength + 1)];
 
 		DataState data = logAdapter.fromTrace(trace);
+		dataTrace[0] = data;
 
 		for (int i = 0; i < trace.size(); i++) {
 			XEvent event = trace.get(i);
 
-			dataTrace[i] = data;
+			dataTrace[i + 1] = data;
 
 			data = data.deepCopy();
 			data = logAdapter.fromEvent(event, data);
+		}
+		for (int i = trace.size() + 1; i < minimumTraceLength + 1; i++) {
+			dataTrace[i] = dataTrace[i - 1];
 		}
 		return dataTrace;
 	}
