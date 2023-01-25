@@ -45,7 +45,8 @@ public class SLDPNDiscoveryPlugin {
 		OneHotEncoding encoder;
 		XLog encodedLog;
 		if (parameters.isOneHotEncoding()) {
-			encoder = new OneHotEncoding(parameters.getClassifier().getDefiningAttributeKeys());
+			encoder = new OneHotEncoding(parameters.getOneHotEncodingMaximumPerVariable(),
+					parameters.getClassifier().getDefiningAttributeKeys());
 
 			// learn the encoding
 			encoder.fit(log);

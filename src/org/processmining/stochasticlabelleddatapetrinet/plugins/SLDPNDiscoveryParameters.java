@@ -8,10 +8,5 @@ public interface SLDPNDiscoveryParameters {
 
 	public boolean isOneHotEncoding();
 
-	/**
-	 * -1 indicates that no limit should be applied
-	 * 
-	 * @return
-	 */
 	public int getOneHotEncodingMaximumPerVariable();
 }

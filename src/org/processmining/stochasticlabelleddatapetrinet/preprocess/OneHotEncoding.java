@@ -43,13 +43,13 @@ public class OneHotEncoding {
 	public OneHotEncoding() {
 		this(new HashSet<>(), Integer.MAX_VALUE);
 	}
-	
+
 	public OneHotEncoding(int maxCategories) {
 		this(new HashSet<>(), maxCategories);
-	}	
+	}
 
-	public OneHotEncoding(String... excludedAttributes) {
-		this(new HashSet<String>(List.of(excludedAttributes)), Integer.MAX_VALUE);
+	public OneHotEncoding(int maxCategories, String... excludedAttributes) {
+		this(new HashSet<String>(List.of(excludedAttributes)), maxCategories);
 	}
 
 	public OneHotEncoding(Set<String> excludedAttributes, int maxCategories) {
@@ -58,11 +58,11 @@ public class OneHotEncoding {
 		this.excludedAttributes.addAll(STANDARD_EXCLUDED_ATTRIBUTES);
 		this.maxCategories = maxCategories;
 	}
-	
+
 	public int getNumEncodedAttributes() {
 		return encoding.size();
 	}
-	
+
 	public void fit(XLog log) {
 		Map<String, Class<?>> categoricalEventAttrs = Maps.filterValues(XUtils.getEventAttributeTypes(log),
 				clazz -> clazz.isAssignableFrom(String.class));
@@ -162,7 +162,7 @@ public class OneHotEncoding {
 			}
 		}
 		XUtils.putAttributes(a, numericAttributesForBoolean);
-		
+
 	}
 
 }
