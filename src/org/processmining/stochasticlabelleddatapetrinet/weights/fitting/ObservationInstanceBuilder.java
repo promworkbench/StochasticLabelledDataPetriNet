@@ -12,13 +12,11 @@ import java.util.UUID;
 
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeMap;
-import org.processmining.datapetrinets.expression.GuardExpression;
 import org.processmining.log.utils.XUtils;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetSemantics;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetrinetSemanticsDataUnaware;
-import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
 import org.processmining.xesalignmentextension.XAlignmentExtension.MoveType;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignmentMove;
@@ -153,9 +151,10 @@ public class ObservationInstanceBuilder {
 	private final StochasticLabelledDataPetriNet net;
 	private final Iterable<XAlignment> alignedLog;
 
-	private final Map<String, Class<?>> attributesForDiscovery;
-	private final Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypeMap;
-	private final Map<String, Integer> attributeIndexMap = new HashMap<>();
+	private final Map<String, StochasticLabelledDataPetriNet.VariableType> variableTypeMap;
+	private final Map<String, Integer> variableIndexMap = new HashMap<>();
+	
+	private final Map<Integer, Integer> attributeIndexMap = new HashMap<>();
 
 	private boolean isTreatMissingValuesAsNA = true;
 	private boolean isUseWeights = true;
@@ -169,9 +168,11 @@ public class ObservationInstanceBuilder {
 			Map<String, StochasticLabelledDataPetriNet.VariableType> attributeTypes) {
 		this.net = net;
 		this.alignedLog = alignedLog;
-		this.attributesForDiscovery = transformToWekaNames(attributesForDiscovery);
 		this.initialValues = initialValues;
-		this.attributeTypeMap = attributeTypes;
+		this.variableTypeMap = attributeTypes;
+		for (int i = 0; i < net.getNumberOfVariables(); i++) {
+			variableIndexMap.put(net.getVariableLabel(i), i);
+		}
 	}	
 	
 	public ProjectedLog buildProjectedLog(SetMultimap<Integer, String> attributesWritten, 
@@ -190,22 +191,22 @@ public class ObservationInstanceBuilder {
 		return projectedLog;
 	}
 	
-	public Map<Integer, Multiset<Map<String, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, 
+	public Map<Integer, Multiset<Map<Integer, Object>>> buildInstancesMultimap(ProjectedLog projectedLog, 
 			Map<String, Integer> eventClass2TransIdx) {
 		
-		final Map<Integer, Multiset<Map<String, Object>>> instances = new HashMap<>();
+		final Map<Integer, Multiset<Map<Integer, Object>>> instances = new HashMap<>();
 		for (Integer clazz : eventClass2TransIdx.values()) {
 			assert clazz >= 0: "we assume non negative transitions indicies";
 			// positive observations
-			instances.put((clazz+1), HashMultiset.<Map<String, Object>>create());
+			instances.put((clazz+1), HashMultiset.<Map<Integer, Object>>create());
 			// negative observations
-			instances.put(-(clazz+1), HashMultiset.<Map<String, Object>>create());
+			instances.put(-(clazz+1), HashMultiset.<Map<Integer, Object>>create());
 		}
 		
 		StochasticLabelledDataPetriNetSemantics semantics = new StochasticLabelledDataPetrinetSemanticsDataUnaware(net);		
 		
-		final Map<String, Object> escapedInitialAttributes = getEscapedInitialAttributes(projectedLog);
-		final Map<String, Object> currentAttributeValues = new HashMap<>();
+		final Map<Integer, Object> escapedInitialAttributes = getEscapedInitialAttributes(projectedLog);
+		final Map<Integer, Object> currentAttributeValues = new HashMap<>();
 		
 		for (ProjectedTrace trace : projectedLog) {
 
@@ -255,23 +256,22 @@ public class ObservationInstanceBuilder {
 		return instances;
 	}
 
-	private void extractAttributeValues(final Map<String, Object> currentAttributeValues, ProjectedAttributable attr) {
+	private void extractAttributeValues(final Map<Integer, Object> currentAttributeValues, ProjectedAttributable attr) {
 		// Update current values with observations
 		for (String attributeKey : attr.getAttributes()) {
 			// NULL is used as marker for missing values
 			Object value = attr.getAttributeValue(attributeKey);
-			String escapedKey = escapeAttributeName(attributeKey);
-			currentAttributeValues.put(escapedKey, value);
+			currentAttributeValues.put(escapeAttributeName(attributeKey), value);
 		}
 	}
 	
-	public Instances buildInstances(Integer transition, Map<Integer, Multiset<Map<String, Object>>> observations) {
+	public Instances buildInstances(Integer transition, Map<Integer, Multiset<Map<Integer, Object>>> instancesMultimap) {
 		
 		String name = UUID.randomUUID().toString();  // dont care about the name
 		
 		// convention that negative class is negation (add +1 to avoid 0 as index)
-		Multiset<Map<String, Object>> positives = observations.get((transition+1));
-		Multiset<Map<String, Object>> negatives = observations.get(-(transition+1));
+		Multiset<Map<Integer, Object>> positives = instancesMultimap.get((transition+1));
+		Multiset<Map<Integer, Object>> negatives = instancesMultimap.get(-(transition+1));
 				
 		int capacity = positives.size() + negatives.size();
 		
@@ -284,9 +284,9 @@ public class ObservationInstanceBuilder {
 		return instances;			
 	}
 
-	private void addInstanceForClass(Instances instances, Integer targetClass, Multiset<Map<String, Object>> classSamples) {
-		for (Multiset.Entry<Map<String, Object>> entry : classSamples.entrySet()) {
-			Map<String, Object> attributesWithNull = Maps.transformValues(entry.getElement(),
+	private void addInstanceForClass(Instances instances, Integer targetClass, Multiset<Map<Integer, Object>> positives) {
+		for (Multiset.Entry<Map<Integer, Object>> entry : positives.entrySet()) {
+			Map<Integer, Object> attributesWithNull = Maps.transformValues(entry.getElement(),
 					(Function<Object, Object>) val -> {
 						if (val == NULL) {
 							return null;
@@ -308,14 +308,14 @@ public class ObservationInstanceBuilder {
 
 	private ArrayList<Attribute> createAttributes(Integer transition) {
 		// plus class attribute
-		ArrayList<Attribute> attributeList = new ArrayList<>(attributesForDiscovery.keySet().size() + 1);
+		ArrayList<Attribute> attributeList = new ArrayList<>(variableTypeMap.size() + 1);
 
 		// positive and negative class
 		attributeList.add(new Attribute("class", List.of("1", "0")));
 				
-		for (Entry<String, VariableType> entry : attributeTypeMap.entrySet()) {
+		for (Entry<String, VariableType> entry : variableTypeMap.entrySet()) {
 			Attribute attr = createAttribute(entry);
-			attributeIndexMap.put(entry.getKey(), attributeList.size());
+			attributeIndexMap.put(variableIndexMap.get(entry.getKey()), attributeList.size());
 			attributeList.add(attr);
 		} 
 		return attributeList;
@@ -323,10 +323,11 @@ public class ObservationInstanceBuilder {
 
 	private Attribute createAttribute(Entry<String, VariableType> entry) {
 		Attribute attr = null;
+		Integer varIdx = variableIndexMap.get(entry.getKey());
 		switch (entry.getValue()) {
 			case DISCRETE : // Do the same as case CONTINOUS
 			case CONTINUOUS :					
-				attr = new Attribute(entry.getKey());					
+				attr = new Attribute(varIdx.toString());					
 				break;
 			case CATEGORICAL :
 				// TODO 
@@ -335,19 +336,19 @@ public class ObservationInstanceBuilder {
 		return attr;
 	}
 
-	private Instance createInstance(Instances instances, Map<String, Object> variableAssignment, Integer target, float weight) {
+	private Instance createInstance(Instances instances, Map<Integer, Object> attributesWithNull, Integer target, float weight) {
 		Instance instance = new DenseInstance(attributeIndexMap.size()+1); // plus class attribute
 		instance.setDataset(instances);
 
 		instance.setWeight(weight);
 		instance.setValue(instances.attribute(0), String.valueOf(target)); // Class value
 		
-		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
+		for (Entry<Integer, Object> entry : attributesWithNull.entrySet()) {
 			
 			Attribute attr = null;
 			
-			String attributeKey = entry.getKey();
-			Integer attributeIndex = attributeIndexMap.get(WekaUtil.wekaUnescape(attributeKey));
+			Integer attributeKey = entry.getKey();
+			Integer attributeIndex = attributeIndexMap.get(attributeKey);
 			if (attributeIndex == null) {
 				throw new RuntimeException("Unknown attribute " + attributeKey);
 			}
@@ -361,7 +362,7 @@ public class ObservationInstanceBuilder {
 				// NULL means there is a missing value for this attribute
 				instance.setMissing(attr);
 			} else {
-				VariableType variableType = attributeTypeMap.get(WekaUtil.wekaUnescape(attributeKey));
+				VariableType variableType = variableTypeMap.get(net.getVariableLabel(attributeKey));
 				if (value instanceof Number && (variableType == VariableType.DISCRETE
 						|| variableType == VariableType.CONTINUOUS))
 					instance.setValue(attr, ((Number) value).doubleValue());
@@ -392,8 +393,8 @@ public class ObservationInstanceBuilder {
 		this.isTreatMissingValuesAsNA = isTreatMissingValuesAsNA;
 	}
 	
-	private Map<String, Object> getEscapedInitialAttributes(ProjectedLog projectedLog) {
-		Builder<String, Object> valueBuilder = ImmutableMap.builder();
+	private Map<Integer, Object> getEscapedInitialAttributes(ProjectedLog projectedLog) {
+		Builder<Integer, Object> valueBuilder = ImmutableMap.builder();
 		for (String attribute : projectedLog.getAttributes()) {
 			Object value = projectedLog.getInitialValue(attribute);
 			if (value != null) {
@@ -413,23 +414,9 @@ public class ObservationInstanceBuilder {
 		}
 		return initialValuesForConsideredAttributes;
 	}
-
-	private Map<String, Class<?>> transformToWekaNames(Map<String, Class<?>> attributesForDiscovery) {
-		com.google.common.collect.ImmutableMap.Builder<String, Class<?>> builder = ImmutableMap.builder();
-		for (Entry<String, Class<?>> attributeEntry : attributesForDiscovery.entrySet()) {
-			//TODO this should be somehow done better!
-			// Prepare as it was prepared for WEKA
-			String wekaAttribute = escapeAttributeName(attributeEntry.getKey());
-			// Prepare for use in guards
-			String guardEscape = GuardExpression.Factory.transformToVariableIdentifier(wekaAttribute);
-			builder.put(guardEscape, attributeEntry.getValue());
-		}
-		return builder.build(); // throws illegal argument when duplicate variable names are detected
-	}
 	
-	private static String escapeAttributeName(String attribute) {
-		//TODO find something better than this, unfortunately WEKA is rather strict on attribute names
-		return WekaUtil.fixVarName(attribute);
+	private Integer escapeAttributeName(String attrName) {
+		return variableIndexMap.get(attrName);
 	}	
 
 }

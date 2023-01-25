@@ -102,7 +102,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 			ProjectedLog projectedLog = builder.buildProjectedLog(variablesWritten, attributesConsidered,
 					eventClass2TransitionIdx);
 
-			Map<Integer, Multiset<Map<String, Object>>> instancesMultimap = builder.buildInstancesMultimap(projectedLog,
+			Map<Integer, Multiset<Map<Integer, Object>>> instancesMultimap = builder.buildInstancesMultimap(projectedLog,
 					eventClass2TransitionIdx);
 
 			for (int tIdx = 0; tIdx < net.getNumberOfTransitions(); tIdx++) {
@@ -146,13 +146,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 							Attribute attr = internalInstances.attribute(i);
 
-							//TODO this is still dangerous since escape<->unescape is not lossless in all cases!
-							Integer varIdxInModel = variableIdx.get(WekaUtil.wekaUnescape(attr.name()));
-							if (varIdxInModel == null) {
-								throw new RuntimeException("Could not find variable in model " + attr.name());
-							}
-
-							weightCoeff[varIdxInModel] = coefficients[i][0];
+							weightCoeff[Integer.valueOf(attr.name())] = coefficients[i][0];
 						}
 
 						sldpnWeights.setWeightFunction(tIdx, new LogisticWeightFunction(intercept, weightCoeff));

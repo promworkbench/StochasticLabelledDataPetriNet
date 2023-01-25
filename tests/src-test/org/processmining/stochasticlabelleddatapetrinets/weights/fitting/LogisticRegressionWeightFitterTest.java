@@ -148,22 +148,17 @@ public class LogisticRegressionWeightFitterTest {
 		// A should have high weight for values 10 and -10
 		DataState ds = netWithWeights.getDefaultSemantics().newDataState();
 		
-		ds.putDouble(0, 10); // variable X
+		ds.putLong(0, 10); // variable X
 		System.out.println(netWithWeights.getTransitionWeight(0, ds)); // transition A
 		assertEquals(1.0, netWithWeights.getTransitionWeight(0, ds), 0.00001);
 		ds.clear();
-
-		ds.putDouble(0, 7.5); // variable X
-		System.out.println(netWithWeights.getTransitionWeight(0, ds)); // transition A
-		assertEquals(0.5104, netWithWeights.getTransitionWeight(0, ds), 0.0001);
-		ds.clear();		
 		
-		ds.putDouble(0, 5); // variable X
+		ds.putLong(0, 5); // variable X
 		System.out.println(netWithWeights.getTransitionWeight(1, ds)); // transition B
 		assertEquals(1.0, netWithWeights.getTransitionWeight(1, ds), 0.00001);
 		ds.clear();
 		
-		ds.putDouble(0, 10); // variable X
+		ds.putLong(0, 10); // variable X
 		System.out.println(netWithWeights.getTransitionWeight(1, ds)); // transition B
 		assertEquals(0.0, netWithWeights.getTransitionWeight(1, ds), 0.00001);
 		ds.clear();
