@@ -35,6 +35,8 @@ public class LogisticRegressionWeightFitterSepsisLogTest {
 		XLog log = SepsisTestLog.loadSepsisLog();
 		
 		OneHotEncoding oneHotEncoding = new OneHotEncoding();
+		oneHotEncoding.fit(log);
+		
 		log = oneHotEncoding.process(log);
 		
 		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);

@@ -1,6 +1,8 @@
 package org.processmining.stochasticlabelleddatapetrinet.logadapter;
 
 import org.deckfour.xes.model.XAttributable;
+import org.deckfour.xes.model.XAttributeContinuous;
+import org.deckfour.xes.model.XAttributeDiscrete;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XTrace;
@@ -45,10 +47,16 @@ public class DataStateLogAdapterImpl implements DataStateLogAdapter {
 				VariableType varType = semantics.getVariableType(i);
 				switch (varType) {
 					case CONTINUOUS:
+						if (!(attributes.get(varLabel) instanceof XAttributeContinuous)) {
+							throw new RuntimeException("Invalid attribute type mapped to CONTINUOUS variable!");
+						}
 						ds.putDouble(i, (Double) XUtils.getAttributeValue(attributes.get(varLabel)));
 						break;
 					case DISCRETE:
 					case CATEGORICAL:
+						if (!(attributes.get(varLabel) instanceof XAttributeDiscrete)) {
+							throw new RuntimeException("Invalid attribute type mapped to DISCRETE or CATEGORICAL variable!");
+						}
 						ds.putLong(i, (Long) XUtils.getAttributeValue(attributes.get(varLabel)));
 						break; //TODO handle string variables and variable mapping
 					default :

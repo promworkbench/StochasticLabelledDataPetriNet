@@ -36,7 +36,7 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 			if (dataState.contains(i)) {
 				weight += dataState.getDouble(i) * coefficients[i];
 			} else {
-				//TODO how to treat missing value, for now we simply do not consider the value at all
+				// We are ignoring the missing variable 
 			}
 		}
 		return sigmoid(weight);

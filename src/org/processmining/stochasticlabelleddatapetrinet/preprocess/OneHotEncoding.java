@@ -1,8 +1,15 @@
 package org.processmining.stochasticlabelleddatapetrinet.preprocess;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +20,7 @@ import org.deckfour.xes.extension.std.XLifecycleExtension;
 import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.model.XAttributable;
 import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeBoolean;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -28,13 +36,15 @@ public class OneHotEncoding {
 			XConceptExtension.KEY_INSTANCE, XTimeExtension.KEY_TIMESTAMP, XLifecycleExtension.KEY_MODEL,
 			XLifecycleExtension.KEY_TRANSITION);
 
-	private final Set<String> excludedAttributes;
+	private Set<String> excludedAttributes;
+	private Map<String, Map<Object, String>> encoding = new HashMap<>();
+
+	public OneHotEncoding() {
+		this(new HashSet<>());
+	}
 
 	public OneHotEncoding(String... excludedAttributes) {
-		this(new HashSet<>());
-		for (String excludedAttribute : excludedAttributes) {
-			this.excludedAttributes.add(excludedAttribute);
-		}
+		this(new HashSet<String>(List.of(excludedAttributes)));
 	}
 
 	public OneHotEncoding(Set<String> excludedAttributes) {
@@ -42,18 +52,19 @@ public class OneHotEncoding {
 		this.excludedAttributes = excludedAttributes;
 		this.excludedAttributes.addAll(STANDARD_EXCLUDED_ATTRIBUTES);
 	}
-
-	public XLog process(XLog log) {
-
-		XLog pLog = (XLog) log.clone();
-
+	
+	public int getNumEncodedAttributes() {
+		return encoding.size();
+	}
+	
+	public void fit(XLog log) {
 		Map<String, Class<?>> categoricalEventAttrs = Maps.filterValues(XUtils.getEventAttributeTypes(log),
-				clazz -> clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(Boolean.class));
+				clazz -> clazz.isAssignableFrom(String.class));
 		List<String> eventAttrLabels = categoricalEventAttrs.keySet().stream()
 				.filter(s -> !excludedAttributes.contains(s)).toList();
 
 		Map<String, Class<?>> categoricalTraceAttrs = Maps.filterValues(XUtils.getTraceAttributeTypes(log),
-				clazz -> clazz.isAssignableFrom(String.class) || clazz.isAssignableFrom(Boolean.class));
+				clazz -> clazz.isAssignableFrom(String.class));
 		List<String> traceAttrLabels = categoricalTraceAttrs.keySet().stream()
 				.filter(s -> !excludedAttributes.contains(s)).toList();
 
@@ -66,8 +77,6 @@ public class OneHotEncoding {
 			}
 		}
 
-		Map<String, Map<Object, String>> encoding = new HashMap<>();
-
 		// Encode
 		for (Entry<String, Collection<Object>> entry : valueMap.asMap().entrySet()) {
 			Map<Object, String> hotMap = new HashMap<>();
@@ -75,11 +84,15 @@ public class OneHotEncoding {
 			for (Object val : entry.getValue()) {
 				hotMap.put(val, entry.getKey() + "_" + hotIdx++);
 			}
+			hotMap.put(null, entry.getKey() + "_unknown"); // for categories it was not trained on	
 			encoding.put(entry.getKey(), hotMap);
 		}
+	}
 
-		// Replace
-		// Remove
+	public XLog process(XLog log) {
+		XLog pLog = (XLog) log.clone();
+
+		// Replace with OneHot 
 		for (XTrace t : pLog) {
 			oneHotEncode(t, encoding);
 			for (XEvent e : t) {
@@ -88,6 +101,19 @@ public class OneHotEncoding {
 		}
 
 		return pLog;
+	}
+
+	public void serialize(OutputStream os) throws IOException {
+		ObjectOutputStream objOut = new ObjectOutputStream(os);
+		objOut.writeObject(excludedAttributes);
+		objOut.writeObject(encoding);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void deserialize(InputStream is) throws ClassNotFoundException, IOException {
+		ObjectInputStream objIn = new ObjectInputStream(is);
+		excludedAttributes = (Set<String>) objIn.readObject();
+		encoding = (Map<String, Map<Object, String>>) objIn.readObject();
 	}
 
 	private void recordAttributeValues(XAttributable a, List<String> attrLabels, Multimap<String, Object> valueMap) {
@@ -100,6 +126,7 @@ public class OneHotEncoding {
 	}
 
 	private void oneHotEncode(XAttributable a, Map<String, Map<Object, String>> oneHotEncoding) {
+		// categorical
 		for (Entry<String, Map<Object, String>> entry : oneHotEncoding.entrySet()) {
 			XAttribute oldVal = a.getAttributes().remove(entry.getKey());
 			if (oldVal != null) {
@@ -114,6 +141,20 @@ public class OneHotEncoding {
 				}
 			}
 		}
+		// boolean
+		Collection<XAttribute> numericAttributesForBoolean = new ArrayList<XAttribute>();
+		for (Iterator<XAttribute> iter = a.getAttributes().values().iterator(); iter.hasNext();) {
+			XAttribute attr = iter.next();
+			if (attr instanceof XAttributeBoolean) {
+				iter.remove();
+				numericAttributesForBoolean.add(XUtils.createAttribute(attr.getKey(),
+						((Boolean) XUtils.getAttributeValue(attr)).booleanValue() ? 1 : 0));
+			}
+		}
+		XUtils.putAttributes(a, numericAttributesForBoolean);
+		
 	}
+
+	// new ChiSquareTest().chiSquareTest(counts, alpha / numberOfTests);
 
 }
