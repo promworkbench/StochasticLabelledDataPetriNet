@@ -117,7 +117,6 @@ public class CrossProductSLDPN {
 								processNewState(z, y, totalWeight, transition, newStateA, newStateB, newDataStateB);
 							} else {
 								//dead state
-								z.semanticsA.executeTransition(transition, stateAB.getDataStateB());
 								y.outgoingStates.add(deadStateA);
 								y.outgoingStateProbabilities
 										.add(z.semanticsA.getTransitionWeight(transition) / totalWeight);
