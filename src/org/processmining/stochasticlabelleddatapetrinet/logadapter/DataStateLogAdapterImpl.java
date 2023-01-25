@@ -48,17 +48,18 @@ public class DataStateLogAdapterImpl implements DataStateLogAdapter {
 				switch (varType) {
 					case CONTINUOUS:
 						if (!(attributes.get(varLabel) instanceof XAttributeContinuous)) {
-							throw new RuntimeException("Invalid attribute type mapped to CONTINUOUS variable!");
+							throw new RuntimeException("Invalid attribute type mapped to CONTINUOUS variable! Variable " + varLabel);
 						}
 						ds.putDouble(i, (Double) XUtils.getAttributeValue(attributes.get(varLabel)));
 						break;
 					case DISCRETE:
-					case CATEGORICAL:
 						if (!(attributes.get(varLabel) instanceof XAttributeDiscrete)) {
-							throw new RuntimeException("Invalid attribute type mapped to DISCRETE or CATEGORICAL variable!");
+							throw new RuntimeException("Invalid attribute type mapped to DISCRETE or CATEGORICAL variable! Variable " + varLabel);
 						}
 						ds.putLong(i, (Long) XUtils.getAttributeValue(attributes.get(varLabel)));
 						break; //TODO handle string variables and variable mapping
+					case CATEGORICAL:
+						throw new RuntimeException("Categorical attributes are not yet supported! Variable " + varLabel);
 					default :
 						break;
 				}				
