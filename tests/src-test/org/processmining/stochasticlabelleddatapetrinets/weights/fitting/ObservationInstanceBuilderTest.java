@@ -114,10 +114,10 @@ public class ObservationInstanceBuilderTest {
 		
 		System.out.println(instances);
 		
-		assertEquals(10, instances.get(1).size()); // B was seen 10 times
-		assertEquals(10, instances.get(1).count(Map.of("X", 10.0))); // B was seen 10 times with X = 10
-		assertEquals(20, instances.get(-1).count(Map.of("X", 5.0))); // non-B was seen 20 times with X = 5
-		assertEquals(0, instances.get(-1).count(Map.of("X", 10.0))); // non-B never saw X = 10
+		assertEquals(10, instances.get(2).size()); // B was seen 10 times
+		assertEquals(10, instances.get(2).count(Map.of("X", 10.0))); // B was seen 10 times with X = 10
+		assertEquals(20, instances.get(-2).count(Map.of("X", 5.0))); // non-B was seen 20 times with X = 5
+		assertEquals(0, instances.get(-2).count(Map.of("X", 10.0))); // non-B never saw X = 10
 		
 		Instances wekaInstances = builder.buildInstances(1, instances);
 		

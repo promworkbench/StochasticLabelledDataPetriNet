@@ -328,7 +328,7 @@ public class ObservationInstanceBuilder {
 	}
 
 	private Instance createInstance(Instances instances, Map<String, Object> variableAssignment, Integer target, float weight) {
-		Instance instance = new DenseInstance(variableAssignment.size()+2);
+		Instance instance = new DenseInstance(attributeIndexMap.size()+1); // plus class attribute
 		instance.setDataset(instances);
 
 		instance.setWeight(weight);

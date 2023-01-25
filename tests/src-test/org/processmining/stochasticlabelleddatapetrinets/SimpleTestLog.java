@@ -1,11 +1,8 @@
 package org.processmining.stochasticlabelleddatapetrinets;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.log.utils.XLogBuilder;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
@@ -29,16 +26,6 @@ public class SimpleTestLog {
 				.addAttribute("X", 10.0).addAttribute("Y", -10.0).addEvent("B").addTrace("t2", 20).addEvent("A")
 				.addAttribute("X", 5.0).addAttribute("Y", -5.0).addEvent("C").build();
 		return log;
-	}
-
-	public static void main(String[] args) throws IOException {
-		File file = new File("/home/sander/Documents/svn/55 - data stochastics - Felix/experiments/testlogdata.xes.gz");
-		XLog log = buildTestLog2Variables();
-		XLogWriterIncremental w = new XLogWriterIncremental(file);
-		for (XTrace trace : log) {
-			w.writeTrace(trace);
-		}
-		w.close();
 	}
 
 	private static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
