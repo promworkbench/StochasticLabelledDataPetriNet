@@ -34,7 +34,7 @@ public class LogisticRegressionWeightFitterSepsisLogTest {
 		StochasticLabelledDataPetriNet net = SepsisTestLog.buildSepsisBaseModel();
 		XLog log = SepsisTestLog.loadSepsisLog();
 		
-		OneHotEncoding oneHotEncoding = new OneHotEncoding(100);
+		OneHotEncoding oneHotEncoding = new OneHotEncoding(10);
 		oneHotEncoding.fit(log);
 		
 		log = oneHotEncoding.process(log);

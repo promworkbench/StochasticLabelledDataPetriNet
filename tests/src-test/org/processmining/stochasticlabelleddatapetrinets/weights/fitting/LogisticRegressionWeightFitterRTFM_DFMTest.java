@@ -48,7 +48,7 @@ public class LogisticRegressionWeightFitterRTFM_DFMTest {
 			XLog log = XUtils.loadLog(new GZIPInputStream(rtfmLog));
 			StochasticLabelledDataPetriNet net = PetrinetConverter.viewAsSLDPN(pn);
 
-			OneHotEncoding oneHotEncoding = new OneHotEncoding();
+			OneHotEncoding oneHotEncoding = new OneHotEncoding(10);
 			oneHotEncoding.fit(log);
 			log = oneHotEncoding.process(log);
 			

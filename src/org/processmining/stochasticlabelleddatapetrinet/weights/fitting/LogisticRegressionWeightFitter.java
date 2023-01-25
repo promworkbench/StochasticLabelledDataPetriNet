@@ -87,14 +87,15 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 			Map<String, Integer> eventClass2TransitionIdx = builderEventClassMapping(net, markedPN);
 
-			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);
-			// TODO support filtering of attributes 
-			Set<String> attributesConsidered = Set.copyOf(variablesWritten.values());
-
 			Map<String, Integer> variableIdx = new HashMap<>();
 			for (int i = 0; i < net.getNumberOfVariables(); i++) {
 				variableIdx.put(net.getVariableLabel(i), i);
 			}
+			
+			// build map of which variable is written where
+			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);			
+			// consider all attributes
+			Set<String> attributesConsidered = variableIdx.keySet();
 
 			ObservationInstanceBuilder builder = createObservationBuilder(net, alignIter);
 

@@ -15,8 +15,15 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetS
 public class SimpleTestLog {
 
 	public static XLog buildTestLog() {
-		final XLog log = XLogBuilder.newInstance().startLog("test").addTrace("t1", 10).addEvent("A")
-				.addAttribute("X", 10.0).addEvent("B").addTrace("t2", 20).addEvent("A").addAttribute("X", 5.0)
+		final XLog log = XLogBuilder.newInstance()
+				.startLog("test")
+				.addTrace("t1", 10)
+					.addEvent("A")
+						.addAttribute("X", 10.0)
+					.addEvent("B")
+				.addTrace("t2", 20)
+					.addEvent("A")
+						.addAttribute("X", 5.0)
 				.addEvent("C").build();
 		return log;
 	}
@@ -27,6 +34,20 @@ public class SimpleTestLog {
 				.addAttribute("X", 5.0).addAttribute("Y", -5.0).addEvent("C").build();
 		return log;
 	}
+	
+	public static XLog buildTestCaseVarsLog() {
+		final XLog log = XLogBuilder.newInstance()
+				.startLog("test")
+				.addTrace("t1", 10)
+					.addAttribute("X", 10.0)
+					.addEvent("A")
+					.addEvent("B")
+				.addTrace("t2", 20)
+					.addAttribute("X", 5.0)
+					.addEvent("A")
+					.addEvent("C").build();
+		return log;
+	}	
 
 	private static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
 		// Simple XOR net

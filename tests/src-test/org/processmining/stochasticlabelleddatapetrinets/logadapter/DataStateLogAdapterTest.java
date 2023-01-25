@@ -1,4 +1,4 @@
-package org.processmining.stochasticlabelleddatapetrinets;
+package org.processmining.stochasticlabelleddatapetrinets.logadapter;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,7 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapter;
 import org.processmining.stochasticlabelleddatapetrinet.logadapter.DataStateLogAdapterImpl;
+import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
 
 public class DataStateLogAdapterTest {
 	

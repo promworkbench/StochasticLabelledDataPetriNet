@@ -27,7 +27,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
@@ -63,13 +62,32 @@ public class ObservationInstanceBuilder {
 		}
 
 	}
+	
+	private static final Object NULL = new Object();
 
 	private final class ProjectedTraceForDiscovery implements ProjectedTrace {
 
 		private final List<ProjectedEvent> eventsForDiscovery;
-
-		private ProjectedTraceForDiscovery(XAlignment alignment, SetMultimap<Integer, String> writtenAttributes,
+		private final ImmutableMap<String, Object> attributes;
+		
+		private ProjectedTraceForDiscovery(XAlignment alignment, Set<String> consideredAttributes, SetMultimap<Integer, String> writtenAttributes,
 				Map<String, Integer> transitionsLocalId) {
+
+			Builder<String, Object> attributeBuilder = ImmutableMap.builder();
+			XAttributeMap traceAttributes = alignment.getTrace().getAttributes();
+			for (String key : consideredAttributes) {
+				XAttribute attribute = traceAttributes.get(key);
+				if (attribute != null) {
+					attributeBuilder.put(key, XUtils.getAttributeValue(attribute));
+				} else {
+					if (isTreatMissingValuesAsNA()) {
+						// Add will result in discovery obtaining a NULL, which is used as special value for missing!
+						attributeBuilder.put(key, NULL);
+					}
+				}
+			}
+			this.attributes = attributeBuilder.build();
+
 			this.eventsForDiscovery = new ArrayList<ProjectedEvent>(alignment.size());
 			for (XAlignmentMove move : alignment) {
 				MoveType type = move.getType();
@@ -86,17 +104,15 @@ public class ObservationInstanceBuilder {
 			return eventsForDiscovery.iterator();
 		}
 
-		public Object getAttributeValue(String attributeName) {
-			return null; // TODO trace attributes?
+		public Set<String> getAttributes() {
+			return attributes.keySet();
 		}
 
-		public Set<String> getAttributes() {
-			return ImmutableSet.of(); // TODO trace attributes?
+		public Object getAttributeValue(String varName) {
+			return attributes.get(varName);
 		}
 
 	}
-
-	private static final Object NULL = new Object();
 
 	private  final class ProjectedEventForDiscovery implements ProjectedEvent {
 
@@ -130,11 +146,7 @@ public class ObservationInstanceBuilder {
 		}
 
 		public Object getAttributeValue(String varName) {
-			Object value = attributes.get(varName);
-			if (value == NULL) {
-				return null;
-			}
-			return value;
+			return attributes.get(varName);
 		}
 	}
 	
@@ -171,7 +183,7 @@ public class ObservationInstanceBuilder {
 				Iterables.transform(alignedLog, new Function<XAlignment, ProjectedTrace>() {
 
 					public ProjectedTrace apply(XAlignment alignment) {						
-						return new ProjectedTraceForDiscovery(alignment, attributesWritten, transitionsLocalId);
+						return new ProjectedTraceForDiscovery(alignment, consideredAttributes, attributesWritten, transitionsLocalId);
 					}
 				}), initialValuesForConsideredAttributes);
 
@@ -249,11 +261,7 @@ public class ObservationInstanceBuilder {
 			// NULL is used as marker for missing values
 			Object value = attr.getAttributeValue(attributeKey);
 			String escapedKey = escapeAttributeName(attributeKey);
-			if (value == null) {
-				currentAttributeValues.put(escapedKey, NULL);
-			} else {
-				currentAttributeValues.put(escapedKey, value);
-			}
+			currentAttributeValues.put(escapedKey, value);
 		}
 	}
 	

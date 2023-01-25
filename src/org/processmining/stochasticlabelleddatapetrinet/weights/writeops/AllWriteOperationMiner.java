@@ -50,7 +50,10 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 
 	public StochasticLabelledDataPetriNet extendWithWrites(StochasticLabelledDataPetriNet net) {
 		
+		// both event and trace attributes
 		Map<String, Class<?>> vars = XUtils.getEventAttributeTypes(log);
+		vars.putAll(XUtils.getTraceAttributeTypes(log));
+		
 		Map<String, Class<?>> numericVars = Maps.filterValues(vars, clazz -> clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(Long.class));
 		
 		List<String> variableLabels = numericVars.keySet().stream()
@@ -69,6 +72,7 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 		Multimap<Integer, Integer> writes = HashMultimap.create(); //TODO use multiset of counting
 		
 		for (XTrace t: log) {
+			// no write operations here which is fine!
 			for (XEvent e: t) {
 				Integer tIdx = transitionMap.get(classifier.getClassIdentity(e));
 				
@@ -90,7 +94,8 @@ public class AllWriteOperationMiner implements WriteOperationMiner {
 			
 			Collection<Integer> observedWrites = writes.get(i);
 			
-			varWrites.add(observedWrites.stream().mapToInt(idx->idx).sorted().toArray()); //TODO not sure if it should/needs to be be sorted
+			//TODO not sure if it should/needs to be be sorted
+			varWrites.add(observedWrites.stream().mapToInt(idx->idx).sorted().toArray()); 
 		}
 		
 		return new StochasticLabelledDataPetriNetWeightsDataDependent(net, 
