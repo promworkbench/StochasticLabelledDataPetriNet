@@ -328,9 +328,10 @@ public class ObservationInstanceBuilder {
 	}
 
 	private Instance createInstance(Instances instances, Map<String, Object> variableAssignment, Integer target, float weight) {
-		Instance instance = new DenseInstance(variableAssignment.size()+1);
+		Instance instance = new DenseInstance(variableAssignment.size()+2);
+		instance.setDataset(instances);
+
 		instance.setWeight(weight);
-		
 		instance.setValue(instances.attribute(0), String.valueOf(target)); // Class value
 		
 		for (Entry<String, Object> entry : variableAssignment.entrySet()) {
@@ -346,7 +347,7 @@ public class ObservationInstanceBuilder {
 			attr = instances.attribute(attributeIndex);
 			if (attr == null)
 				continue;
-			
+
 			Object value = entry.getValue();
 			if (value == null) {
 				// NULL means there is a missing value for this attribute

@@ -24,7 +24,7 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.writeops.AllWrit
 import org.processmining.stochasticlabelleddatapetrinets.FakeContext;
 import org.processmining.stochasticlabelleddatapetrinets.IntegrationTestUtil;
 
-public class LogisticRegressionWeightFitterRTFMTest {
+public class LogisticRegressionWeightFitterRTFM_DFMTest {
 	
 	@BeforeClass
 	public static void init() throws Throwable {
@@ -39,8 +39,8 @@ public class LogisticRegressionWeightFitterRTFMTest {
 	@Test
 	public void weightFittingRTFMTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
 		
-		try (InputStream rtfmModel = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz-IMf.apnml");
-			 InputStream rtfmLog = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz1.xes.gz")) {
+		try (InputStream rtfmModel = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz-DFM.apnml");
+			 InputStream rtfmLog = getClass().getResourceAsStream("Road_Traffic_Fine_Management_Process.xes.gz3.xes.gz")) {
 		
 			AcceptingPetriNet pn = AcceptingPetriNetFactory.createAcceptingPetriNet();
 			pn.importFromStream(new FakeContext(), rtfmModel);

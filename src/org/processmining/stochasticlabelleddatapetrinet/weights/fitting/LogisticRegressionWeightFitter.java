@@ -114,7 +114,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 				if (wekaInstances.numDistinctValues(0) > 1) {
 					try {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
-						logistic.setMaxIts(10000);
+						logistic.setMaxIts(1000);
 						logistic.buildClassifier(wekaInstances);
 						
 						if (keepEvaluation) {
