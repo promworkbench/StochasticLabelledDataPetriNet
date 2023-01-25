@@ -73,7 +73,11 @@ public class duEMSC {
 					TraceProbablility.getTraceProbability(semantics, activitySequence, dataSequence, canceller));
 
 			sum = sum.add(probabilityConditionalModel.multiply(dataSequenceProbabilityLog));
+			
+//			System.out.println("    trace+data done");
 		}
+		
+//		System.out.println("  trace done");
 		
 		//		TObjectIntIterator<DataState[]> it = dataSequences.iterator();
 		//		it.advance();

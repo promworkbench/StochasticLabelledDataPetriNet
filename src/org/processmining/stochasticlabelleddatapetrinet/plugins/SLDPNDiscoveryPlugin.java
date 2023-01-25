@@ -27,7 +27,7 @@ public class SLDPNDiscoveryPlugin {
 	@UITopiaVariant(affiliation = IMMiningDialog.affiliation, author = IMMiningDialog.author, email = IMMiningDialog.email)
 	@PluginVariant(variantLabel = "Mine an SLDPN, dialog", requiredParameterLabels = { 0, 1 })
 	public SLDPN mine(UIPluginContext context, AcceptingPetriNet model, XLog xLog) throws Exception {
-		return discover(xLog, model, new XEventNameClassifier());
+		return discover(xLog, model, new XEventNameClassifier(), false);
 	}
 
 	/**
@@ -40,17 +40,24 @@ public class SLDPNDiscoveryPlugin {
 	 * @return
 	 * @throws WeightFitterException
 	 */
-	public static SLDPN discover(XLog log, AcceptingPetriNet controlFlowModel, XEventClassifier classifier)
-			throws WeightFitterException {
+	public static SLDPN discover(XLog log, AcceptingPetriNet controlFlowModel, XEventClassifier classifier,
+			boolean oneHotEncoding) throws WeightFitterException {
 		StochasticLabelledDataPetriNet dnet = PetrinetConverter.viewAsSLDPN(controlFlowModel);
 
-		OneHotEncoding oneHotEncoding = new OneHotEncoding(classifier.getDefiningAttributeKeys());
-		
-		// learn the encoding
-		oneHotEncoding.fit(log);
-		
-		// apply
-		XLog encodedLog = oneHotEncoding.process(log);
+		OneHotEncoding encoder;
+		XLog encodedLog;
+		if (oneHotEncoding) {
+			encoder = new OneHotEncoding(classifier.getDefiningAttributeKeys());
+
+			// learn the encoding
+			encoder.fit(log);
+
+			// apply
+			encodedLog = encoder.process(log);
+		} else {
+			encoder = null;
+			encodedLog = log;
+		}
 
 		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(encodedLog);
 
@@ -60,6 +67,6 @@ public class SLDPNDiscoveryPlugin {
 
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(encodedLog, dnet);
 
-		return new SLDPN(oneHotEncoding, netWithWeights);
+		return new SLDPN(encoder, netWithWeights);
 	}
 }

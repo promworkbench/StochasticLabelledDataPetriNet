@@ -36,7 +36,7 @@ public class SLDPNExportPlugin {
 		}
 
 		//write one-hot-encoding
-		{
+		if (sldpn.getOneHotEncoding() != null) {
 			ZipEntry e = new ZipEntry(FILENAME_ENCODING);
 			out.putNextEntry(e);
 			sldpn.getOneHotEncoding().serialize(out);

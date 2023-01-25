@@ -26,8 +26,9 @@ public class SLDPNImportPlugin extends AbstractImportPlugin {
 		return read(input);
 	}
 
-	public static SLDPN read(InputStream in) throws IOException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public static SLDPN read(InputStream in)
+			throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 
 		ZipEntry ze;
@@ -45,7 +46,7 @@ public class SLDPNImportPlugin extends AbstractImportPlugin {
 		}
 		zis.close();
 
-		if (model == null || encoding == null) {
+		if (model == null) {
 			throw new RuntimeException("File is not a valid SLDPN.");
 		}
 		return new SLDPN(encoding, model);
