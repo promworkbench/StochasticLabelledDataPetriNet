@@ -30,8 +30,11 @@ public class OneHotEncoding {
 
 	private final Set<String> excludedAttributes;
 
-	public OneHotEncoding() {
+	public OneHotEncoding(String... excludedAttributes) {
 		this(new HashSet<>());
+		for (String excludedAttribute : excludedAttributes) {
+			this.excludedAttributes.add(excludedAttribute);
+		}
 	}
 
 	public OneHotEncoding(Set<String> excludedAttributes) {
