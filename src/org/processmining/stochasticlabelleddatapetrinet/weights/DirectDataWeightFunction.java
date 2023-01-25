@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
 /**
@@ -35,8 +37,13 @@ public class DirectDataWeightFunction implements SerializableWeightFunction {
 		this.variableIdx = variableIdx;
 	}
 
-	public double evaluateWeight(DataState dataState) {
-		double val = dataState.getDouble(variableIdx);
+	public double evaluateWeight(StochasticLabelledDataPetriNet net, DataState dataState) {		
+		double val;
+		if (net.getVariableType(variableIdx) == VariableType.DISCRETE) {
+			val = dataState.getLong(variableIdx);
+		} else {
+			val = dataState.getDouble(variableIdx);	
+		}		
 		if (val == 0) {
 			return EPSILON;
 		} else {

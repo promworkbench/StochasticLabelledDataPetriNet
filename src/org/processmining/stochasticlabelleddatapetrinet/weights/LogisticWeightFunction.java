@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
 public class LogisticWeightFunction implements SerializableWeightFunction {
@@ -25,7 +27,7 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 		this.intercept = intercept;
 	}
 
-	public double evaluateWeight(DataState dataState) {
+	public double evaluateWeight(StochasticLabelledDataPetriNet net, DataState dataState) {
 		if (coefficients.length != dataState.capacity()) {
 			throw new IllegalArgumentException("Mismatch between DataState and learned coefficients. Expecting "
 					+ coefficients.length + " variables but received " + dataState.capacity());
@@ -34,7 +36,11 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 		double weight = intercept;
 		for (int i = 0; i < dataState.capacity(); i++) {
 			if (dataState.contains(i)) {
-				weight += dataState.getDouble(i) * coefficients[i];
+				if (net.getVariableType(i) == VariableType.DISCRETE) {
+					weight += dataState.getLong(i) * coefficients[i];
+				} else {
+					weight += dataState.getDouble(i) * coefficients[i];	
+				}				
 			} else {
 				// We are ignoring the missing variable 
 			}

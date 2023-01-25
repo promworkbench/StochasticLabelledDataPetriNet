@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
 /**
@@ -28,7 +29,7 @@ public class ConstantWeightFunction implements SerializableWeightFunction {
 		this.weight = weight;
 	}
 
-	public double evaluateWeight(DataState dataState) {
+	public double evaluateWeight(StochasticLabelledDataPetriNet net, DataState dataState) {
 		return weight;
 	}
 

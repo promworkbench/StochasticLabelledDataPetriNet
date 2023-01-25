@@ -109,7 +109,7 @@ public class StochasticLabelledDataPetriNetWeightsDataDependent extends Stochast
 
 	@Override
 	public double getTransitionWeight(int transition, DataState dataState) {
-		return transitionWeights.get(transition).evaluateWeight(dataState);
+		return transitionWeights.get(transition).evaluateWeight(this, dataState);
 	}
 
 	@Override

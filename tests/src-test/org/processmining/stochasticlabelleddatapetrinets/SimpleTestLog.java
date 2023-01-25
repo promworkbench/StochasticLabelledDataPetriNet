@@ -1,11 +1,8 @@
 package org.processmining.stochasticlabelleddatapetrinets;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.log.utils.XLogBuilder;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
@@ -32,9 +29,16 @@ public class SimpleTestLog {
 	}
 
 	public static XLog buildTestLog2Variables() {
-		final XLog log = XLogBuilder.newInstance().startLog("test").addTrace("t1", 10).addEvent("A")
-				.addAttribute("X", 10.0).addAttribute("Y", -10.0).addEvent("B").addTrace("t2", 20).addEvent("A")
-				.addAttribute("X", 5.0).addAttribute("Y", -5.0).addEvent("C").build();
+		final XLog log = XLogBuilder.newInstance().startLog("test")
+				.addTrace("t1", 10)
+					.addEvent("A")
+						.addAttribute("X", 10.0)
+						.addAttribute("Y", -10.0)
+					.addEvent("B").addTrace("t2", 20)
+						.addEvent("A")
+						.addAttribute("X", 5.0)
+						.addAttribute("Y", -5.0)
+					.addEvent("C").build();
 		return log;
 	}
 	
@@ -50,8 +54,20 @@ public class SimpleTestLog {
 					.addEvent("A")
 					.addEvent("C").build();
 		return log;
+	}
+	
+	public static XLog buildTestABCaseVarsLog() {
+		final XLog log = XLogBuilder.newInstance()
+				.startLog("test")
+				.addTrace("t1", 1000)
+					.addAttribute("X", 10.0)
+					.addEvent("A")
+				.addTrace("t2", 2000)
+					.addAttribute("X", 5.0)
+					.addEvent("B").build();
+		return log;
 	}	
-
+	
 	public static XLog buildTestLog2TraceVariables() {
 		final XLog log = XLogBuilder.newInstance().startLog("test")//
 				.addTrace("t1", 5000).addAttribute("X", 10).addEvent("A")//
@@ -59,16 +75,31 @@ public class SimpleTestLog {
 				.build();
 		return log;
 	}
+	
+	private static StochasticLabelledPetriNetSimpleWeightsEditable build_AB_SLPN() {
+		// Simple XOR net
+		StochasticLabelledPetriNetSimpleWeightsEditable slpn = new StochasticLabelledPetriNetSimpleWeightsImpl();
 
-	public static void main(String[] args) throws IOException {
-		XLog log = buildTestLog2TraceVariables();
-		XLogWriterIncremental w = new XLogWriterIncremental(new File("/home/sander/Documents/svn/55 - data stochastics - Felix/experiments/testlogdata 2.xes.gz"));
-		for (XTrace trace : log) {
-			w.writeTrace(trace);
-		}
-		w.close();
+		int p1 = slpn.addPlace();
+		slpn.addPlaceToInitialMarking(p1);
+
+		int tA = slpn.addTransition("A", 1);
+		slpn.addPlaceTransitionArc(p1, tA);
+
+		int tB = slpn.addTransition("B", 1);
+		slpn.addPlaceTransitionArc(p1, tB);
+
+		int p2 = slpn.addPlace();
+		slpn.addTransitionPlaceArc(tA, p2);
+		slpn.addTransitionPlaceArc(tB, p2);
+		return slpn;
 	}
 
+	public static StochasticLabelledDataPetriNetWeightsDataIndependent buildABModel() {
+		StochasticLabelledPetriNetSimpleWeightsEditable slpn = build_AB_SLPN();
+		return new StochasticLabelledDataPetriNetWeightsDataIndependent(slpn);
+	}
+	
 	private static StochasticLabelledPetriNetSimpleWeightsEditable buildSLPN() {
 		// Simple XOR net
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = new StochasticLabelledPetriNetSimpleWeightsImpl();

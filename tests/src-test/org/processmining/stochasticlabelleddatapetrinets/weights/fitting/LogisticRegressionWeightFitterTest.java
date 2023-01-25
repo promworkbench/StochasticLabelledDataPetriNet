@@ -28,7 +28,6 @@ public class LogisticRegressionWeightFitterTest {
 		}
 	}
 	
-	
 	@Test
 	public void weightFittingSingleVariableTest() throws WeightFitterException {
 		
@@ -40,7 +39,6 @@ public class LogisticRegressionWeightFitterTest {
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(log, net);
 		
 		assertNotNull(netWithWeights);
-		
 	}
 		
 	@Test
@@ -130,6 +128,47 @@ public class LogisticRegressionWeightFitterTest {
 		ds.clear();
 		
 	}
-	
+
+	@Test
+	public void weightFittingABCaseVariablesTest() throws WeightFitterException {
+		
+		StochasticLabelledDataPetriNet net = SimpleTestLog.buildABModel();
+		XLog log = SimpleTestLog.buildTestLog2TraceVariables();
+		
+		AllWriteOperationMiner writeOpMiner = new AllWriteOperationMiner(log);
+		
+		net = writeOpMiner.extendWithWrites(net);
+		
+		WeightFitter fitter = new LogisticRegressionWeightFitter(new XEventNameClassifier());
+		
+		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(log, net);
+		
+		assertNotNull(netWithWeights);
+		
+		// A should have high weight for values 10 and -10
+		DataState ds = netWithWeights.getDefaultSemantics().newDataState();
+		
+		ds.putDouble(0, 10); // variable X
+		System.out.println(netWithWeights.getTransitionWeight(0, ds)); // transition A
+		assertEquals(1.0, netWithWeights.getTransitionWeight(0, ds), 0.00001);
+		ds.clear();
+
+		ds.putDouble(0, 7.5); // variable X
+		System.out.println(netWithWeights.getTransitionWeight(0, ds)); // transition A
+		assertEquals(0.5104, netWithWeights.getTransitionWeight(0, ds), 0.0001);
+		ds.clear();		
+		
+		ds.putDouble(0, 5); // variable X
+		System.out.println(netWithWeights.getTransitionWeight(1, ds)); // transition B
+		assertEquals(1.0, netWithWeights.getTransitionWeight(1, ds), 0.00001);
+		ds.clear();
+		
+		ds.putDouble(0, 10); // variable X
+		System.out.println(netWithWeights.getTransitionWeight(1, ds)); // transition B
+		assertEquals(0.0, netWithWeights.getTransitionWeight(1, ds), 0.00001);
+		ds.clear();
+		
+	}
+
 	
 }
