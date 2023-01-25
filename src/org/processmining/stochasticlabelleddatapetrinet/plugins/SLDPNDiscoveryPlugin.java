@@ -1,7 +1,5 @@
 package org.processmining.stochasticlabelleddatapetrinet.plugins;
 
-import org.deckfour.xes.classification.XEventClassifier;
-import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -27,7 +25,7 @@ public class SLDPNDiscoveryPlugin {
 	@UITopiaVariant(affiliation = IMMiningDialog.affiliation, author = IMMiningDialog.author, email = IMMiningDialog.email)
 	@PluginVariant(variantLabel = "Mine an SLDPN, dialog", requiredParameterLabels = { 0, 1 })
 	public SLDPN mine(UIPluginContext context, AcceptingPetriNet model, XLog xLog) throws Exception {
-		return discover(xLog, model, new XEventNameClassifier(), false);
+		return discover(xLog, model, new SLDPNDiscoveryParametersDefault());
 	}
 
 	/**
@@ -40,14 +38,14 @@ public class SLDPNDiscoveryPlugin {
 	 * @return
 	 * @throws WeightFitterException
 	 */
-	public static SLDPN discover(XLog log, AcceptingPetriNet controlFlowModel, XEventClassifier classifier,
-			boolean oneHotEncoding) throws WeightFitterException {
+	public static SLDPN discover(XLog log, AcceptingPetriNet controlFlowModel, SLDPNDiscoveryParameters parameters)
+			throws WeightFitterException {
 		StochasticLabelledDataPetriNet dnet = PetrinetConverter.viewAsSLDPN(controlFlowModel);
 
 		OneHotEncoding encoder;
 		XLog encodedLog;
-		if (oneHotEncoding) {
-			encoder = new OneHotEncoding(classifier.getDefiningAttributeKeys());
+		if (parameters.isOneHotEncoding()) {
+			encoder = new OneHotEncoding(parameters.getClassifier().getDefiningAttributeKeys());
 
 			// learn the encoding
 			encoder.fit(log);
@@ -63,7 +61,7 @@ public class SLDPNDiscoveryPlugin {
 
 		dnet = writeOpMiner.extendWithWrites(dnet);
 
-		WeightFitter fitter = new LogisticRegressionWeightFitter(classifier);
+		WeightFitter fitter = new LogisticRegressionWeightFitter(parameters.getClassifier());
 
 		StochasticLabelledDataPetriNetWeights netWithWeights = fitter.fit(encodedLog, dnet);
 
