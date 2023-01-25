@@ -38,19 +38,25 @@ public class OneHotEncoding {
 
 	private Set<String> excludedAttributes;
 	private Map<String, Map<Object, String>> encoding = new HashMap<>();
+	private int maxCategories;
 
 	public OneHotEncoding() {
-		this(new HashSet<>());
+		this(new HashSet<>(), Integer.MAX_VALUE);
 	}
+	
+	public OneHotEncoding(int maxCategories) {
+		this(new HashSet<>(), maxCategories);
+	}	
 
 	public OneHotEncoding(String... excludedAttributes) {
-		this(new HashSet<String>(List.of(excludedAttributes)));
+		this(new HashSet<String>(List.of(excludedAttributes)), Integer.MAX_VALUE);
 	}
 
-	public OneHotEncoding(Set<String> excludedAttributes) {
+	public OneHotEncoding(Set<String> excludedAttributes, int maxCategories) {
 		super();
 		this.excludedAttributes = excludedAttributes;
 		this.excludedAttributes.addAll(STANDARD_EXCLUDED_ATTRIBUTES);
+		this.maxCategories = maxCategories;
 	}
 	
 	public int getNumEncodedAttributes() {
@@ -78,14 +84,18 @@ public class OneHotEncoding {
 		}
 
 		// Encode
+		//TODO use statistic tests? (
+		// new ChiSquareTest().chiSquareTest(counts, alpha / numberOfTests);
 		for (Entry<String, Collection<Object>> entry : valueMap.asMap().entrySet()) {
-			Map<Object, String> hotMap = new HashMap<>();
-			int hotIdx = 0;
-			for (Object val : entry.getValue()) {
-				hotMap.put(val, entry.getKey() + "_" + hotIdx++);
+			if (entry.getValue().size() <= maxCategories) {
+				Map<Object, String> hotMap = new HashMap<>();
+				int hotIdx = 0;
+				for (Object val : entry.getValue()) {
+					hotMap.put(val, entry.getKey() + "_" + hotIdx++);
+				}
+				hotMap.put(null, entry.getKey() + "_unknown"); // for categories it was not trained on	
+				encoding.put(entry.getKey(), hotMap);
 			}
-			hotMap.put(null, entry.getKey() + "_unknown"); // for categories it was not trained on	
-			encoding.put(entry.getKey(), hotMap);
 		}
 	}
 
@@ -154,7 +164,5 @@ public class OneHotEncoding {
 		XUtils.putAttributes(a, numericAttributesForBoolean);
 		
 	}
-
-	// new ChiSquareTest().chiSquareTest(counts, alpha / numberOfTests);
 
 }

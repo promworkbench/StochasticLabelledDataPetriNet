@@ -32,7 +32,6 @@ public class OneHotEncodingTest {
 		oneHotEncoding.fit(log);
 		
 		XLog logBeforeSerialize = oneHotEncoding.process(log);
-
 		
 		Path tempFile = Files.createTempFile("onehotencoding", ".sldpn");
 		
