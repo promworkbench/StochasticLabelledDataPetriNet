@@ -16,7 +16,12 @@ public class DataUnitEarthMoversStochasticConformancePlugin {
 			ProMCanceller canceller) throws LpSolveException {
 
 		OneHotEncoding encoder = model.getOneHotEncoding();
-		XLog log2 = encoder.process(log);
+		XLog log2;
+		if (encoder != null) {
+			log2 = encoder.process(log);
+		} else {
+			log2 = log;
+		}
 
 		StochasticLabelledDataPetriNetSemantics semanticsB = model.getModel().getDefaultSemantics();
 
