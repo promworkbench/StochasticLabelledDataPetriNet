@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeightsDataDependent;
 import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.DirectDataWeightFunction;
@@ -109,7 +110,7 @@ public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticL
 	}
 
 	@Override
-	public StochasticLabelledDataPetriNet deserialize(InputStream is)
+	public StochasticLabelledDataPetriNetWeights deserialize(InputStream is)
 			throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 

@@ -11,7 +11,7 @@ import org.processmining.contexts.uitopia.annotations.UIImportPlugin;
 import org.processmining.framework.abstractplugins.AbstractImportPlugin;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.io.OneHotEncodingSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.io.StochasticLabelledDataPetriNetSerializerImpl;
 import org.processmining.stochasticlabelleddatapetrinet.preprocess.OneHotEncoding;
@@ -32,7 +32,7 @@ public class SLDPNImportPlugin extends AbstractImportPlugin {
 
 		ZipEntry ze;
 
-		StochasticLabelledDataPetriNet model = null;
+		StochasticLabelledDataPetriNetWeights model = null;
 		OneHotEncoding encoding = null;
 
 		while ((ze = zis.getNextEntry()) != null) {

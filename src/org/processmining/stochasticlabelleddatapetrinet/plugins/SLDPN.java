@@ -1,14 +1,14 @@
 package org.processmining.stochasticlabelleddatapetrinet.plugins;
 
-import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
+import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.preprocess.OneHotEncoding;
 
 public class SLDPN {
 
 	private final OneHotEncoding oneHotEncoding;
-	private final StochasticLabelledDataPetriNet model;
+	private final StochasticLabelledDataPetriNetWeights model;
 
-	public SLDPN(OneHotEncoding oneHotEncoding, StochasticLabelledDataPetriNet model) {
+	public SLDPN(OneHotEncoding oneHotEncoding, StochasticLabelledDataPetriNetWeights model) {
 		this.oneHotEncoding = oneHotEncoding;
 		this.model = model;
 	}
@@ -17,7 +17,7 @@ public class SLDPN {
 		return oneHotEncoding;
 	}
 
-	public StochasticLabelledDataPetriNet getModel() {
+	public StochasticLabelledDataPetriNetWeights getModel() {
 		return model;
 	}
 
