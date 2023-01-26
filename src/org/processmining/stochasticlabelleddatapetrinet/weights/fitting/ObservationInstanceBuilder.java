@@ -327,7 +327,7 @@ public class ObservationInstanceBuilder {
 		switch (entry.getValue()) {
 			case DISCRETE : // Do the same as case CONTINOUS
 			case CONTINUOUS :					
-				attr = new Attribute(varIdx.toString());					
+				attr = new Attribute(varIdx.toString()); // Use the variable index as WEKA name				
 				break;
 			case CATEGORICAL :
 				// TODO 

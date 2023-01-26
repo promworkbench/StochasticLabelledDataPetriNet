@@ -23,7 +23,6 @@ import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConve
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter.PetrinetMarkedWithMappings;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetUtils;
 import org.processmining.stochasticlabelleddatapetrinet.weights.LogisticWeightFunction;
-import org.processmining.stochasticlabelleddatapetrinet.weights.fitting.weka.WekaUtil;
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
