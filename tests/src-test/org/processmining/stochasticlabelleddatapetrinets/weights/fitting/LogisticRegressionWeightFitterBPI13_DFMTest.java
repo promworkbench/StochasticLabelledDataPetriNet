@@ -37,7 +37,7 @@ public class LogisticRegressionWeightFitterBPI13_DFMTest {
 	
 	
 	@Test
-	public void weightFittingRTFMTest() throws UnknownTreeNodeException, ReductionFailedException, Exception {
+	public void weightFittingBPI13Test() throws UnknownTreeNodeException, ReductionFailedException, Exception {
 		
 		try (InputStream rtfmModel = getClass().getResourceAsStream("BPI_Challenge_2013_incidents.xes.gz-DFM.apnml");
 			 InputStream rtfmLog = getClass().getResourceAsStream("BPI_Challenge_2013_incidents.xes.gz9.xes.gz")) {

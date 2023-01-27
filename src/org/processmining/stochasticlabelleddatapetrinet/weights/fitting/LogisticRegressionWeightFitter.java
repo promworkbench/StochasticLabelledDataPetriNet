@@ -22,6 +22,7 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetConverter.PetrinetMarkedWithMappings;
 import org.processmining.stochasticlabelleddatapetrinet.pnadapater.PetrinetUtils;
+import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.LogisticWeightFunction;
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
@@ -154,7 +155,11 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 						throw new WeightFitterException(e1);
 					}
 				} else {
-					System.out.println("Instances only recorded for one class, no fitting possible!");
+					int positiveCount = instancesMultimap.get(tIdx+1).size();
+					int negativeCount = instancesMultimap.get(tIdx-1).size();
+					double constantWeight = ((double)positiveCount) / (positiveCount + negativeCount);
+					System.out.println("No variables or instances only recorded for one class, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+					sldpnWeights.setWeightFunction(tIdx, new ConstantWeightFunction(constantWeight));
 				}
 			}
 
