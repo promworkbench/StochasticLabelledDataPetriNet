@@ -9,13 +9,12 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginLevel;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.plugins.graphviz.visualisation.DotPanel;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
 public class SLDPNWeightedVisualisationPlugin  {
 
-	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) visualisation", returnLabels = {
+	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) - replay", returnLabels = {
 	"SLDPN visualization" }, returnTypes = { JComponent.class }, parameterLabels = {
 			"SLDPN", "canceller" }, userAccessible = true, level = PluginLevel.Regular)
 	@Visualizer
@@ -23,10 +22,15 @@ public class SLDPNWeightedVisualisationPlugin  {
 	@PluginVariant(variantLabel = "Stochastic labelled Data Petri net visualisation", requiredParameterLabels = { 0, 1 })
 	public JComponent visualise(final PluginContext context, StochasticLabelledDataPetriNetWeights net,
 		ProMCanceller canceller) {
-		return createVisualisation(net);
+		SLDPNVisualizer<StochasticLabelledDataPetriNetWeights> visualizer = new SLDPNVisualizer<StochasticLabelledDataPetriNetWeights>(net) {
+
+			protected double getTransitionWeight(int a, DataState dataState) {
+				return net.getTransitionWeight(a, dataState);
+			}};
+		return visualizer.visualiseNet();
 	}	
 	
-	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) visualisation", returnLabels = {
+	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) - replay", returnLabels = {
 	"Dot visualization" }, returnTypes = { JComponent.class }, parameterLabels = {
 			"SLDPN", "canceller" }, userAccessible = true, level = PluginLevel.Regular)
 	@Visualizer
@@ -34,16 +38,25 @@ public class SLDPNWeightedVisualisationPlugin  {
 	@PluginVariant(variantLabel = "Stochastic labelled Data Petri net visualisation", requiredParameterLabels = { 0, 1 })
 	public JComponent visualise(final PluginContext context, SLDPN net,
 		ProMCanceller canceller) {
-		return createVisualisation(net.getModel());
+		return visualise(context, net.getModel(), canceller);
 	}
+	
+	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) - weight function", returnLabels = {
+	"Dot visualization" }, returnTypes = { JComponent.class }, parameterLabels = {
+			"SLDPN", "canceller" }, userAccessible = true, level = PluginLevel.Regular)
+	@Visualizer
+	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "Felix Mannhardt", email = "f.mannhardt@tue.nl")
+	@PluginVariant(variantLabel = "Stochastic labelled Data Petri net visualisation", requiredParameterLabels = { 0, 1 })
+	public JComponent visualiseWeightFunction(final PluginContext context, SLDPN net,
+		ProMCanceller canceller) {
+		SLDPNVisualizerWeightFunctionParameters<StochasticLabelledDataPetriNetWeights> visualizer = new SLDPNVisualizerWeightFunctionParameters<StochasticLabelledDataPetriNetWeights>(net.getModel()) {
 
-	DotPanel createVisualisation(final StochasticLabelledDataPetriNetWeights net) {
-		SLDPNVisualizer<StochasticLabelledDataPetriNetWeights> visualizer = new SLDPNVisualizer<StochasticLabelledDataPetriNetWeights>(net) {
+			protected String getWeightFunctionParameters(int a) {
+				return net.getModel().getWeightFunction(a).toString();
+			} };
 
-			protected double getTransitionWeight(int a, DataState dataState) {
-				return net.getTransitionWeight(a, dataState);
-			}};
 		return visualizer.visualiseNet();
-	}		
+	}	
+
 	
 }

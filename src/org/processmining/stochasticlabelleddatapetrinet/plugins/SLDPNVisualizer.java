@@ -97,7 +97,6 @@ public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> 
 		for (int variable = 0; variable < net.getNumberOfVariables(); variable++) {
 			VariableNode dotNode = new VariableNode(net.getVariableLabel(variable));
 			variable2dotNode.put(variable, dotNode);
-			decorateTransition(net, variable, dotNode);
 			dot.addNode(dotNode);
 		}		
 
@@ -130,7 +129,7 @@ public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> 
 			
 			for (int variable: net.getWriteVariables(transition)) {
 				dot.addEdge(dotNode, variable2dotNode.get(variable), "", 
-						Map.of("constraint", "false", "style", "dotted", "penwidth", "2"));
+						Map.of("style", "dotted", "penwidth", "2"));
 			}
 			
 			transition2dotNode.put(transition, dotNode);
