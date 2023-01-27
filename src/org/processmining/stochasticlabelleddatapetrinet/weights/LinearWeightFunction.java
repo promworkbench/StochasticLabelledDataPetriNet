@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
@@ -85,7 +86,17 @@ public class LinearWeightFunction implements SerializableWeightFunction  {
 	}
 
 	public String toString() {
-		return "LinearWeightFunction [coefficients=" + Arrays.toString(coefficients) + ", intercept=" + intercept + "]";
-	}	
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format(Locale.ENGLISH, "%.3f+[", intercept));		
+		for (int i = 0; i < coefficients.length; i++) {
+			double d = coefficients[i];
+			sb.append(String.format(Locale.ENGLISH, "%.3f", d));
+			if (i < coefficients.length-1) {
+				sb.append(",");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
 
 }

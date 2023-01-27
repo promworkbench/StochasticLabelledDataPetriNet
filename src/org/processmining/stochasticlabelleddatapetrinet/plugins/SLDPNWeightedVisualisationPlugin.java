@@ -9,20 +9,21 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginLevel;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.plugins.graphviz.dot.DotNode;
+import org.processmining.plugins.graphviz.visualisation.DotPanel;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
+import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
-public class SLDPNWeightedVisualisationPlugin extends SLDPNVisualisationPlugin<StochasticLabelledDataPetriNetWeights> {
+public class SLDPNWeightedVisualisationPlugin  {
 
 	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) visualisation", returnLabels = {
-	"Dot visualization" }, returnTypes = { JComponent.class }, parameterLabels = {
+	"SLDPN visualization" }, returnTypes = { JComponent.class }, parameterLabels = {
 			"SLDPN", "canceller" }, userAccessible = true, level = PluginLevel.Regular)
 	@Visualizer
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "Felix Mannhardt", email = "f.mannhardt@tue.nl")
-	@PluginVariant(variantLabel = "Stochastic labelled Petri net visualisation", requiredParameterLabels = { 0, 1 })
+	@PluginVariant(variantLabel = "Stochastic labelled Data Petri net visualisation", requiredParameterLabels = { 0, 1 })
 	public JComponent visualise(final PluginContext context, StochasticLabelledDataPetriNetWeights net,
 		ProMCanceller canceller) {
-		return visualise(net);
+		return createVisualisation(net);
 	}	
 	
 	@Plugin(name = "Stochastic labelled Data Petri net (SLDPN) visualisation", returnLabels = {
@@ -30,17 +31,19 @@ public class SLDPNWeightedVisualisationPlugin extends SLDPNVisualisationPlugin<S
 			"SLDPN", "canceller" }, userAccessible = true, level = PluginLevel.Regular)
 	@Visualizer
 	@UITopiaVariant(affiliation = UITopiaVariant.EHV, author = "Felix Mannhardt", email = "f.mannhardt@tue.nl")
-	@PluginVariant(variantLabel = "Stochastic labelled Petri net visualisation", requiredParameterLabels = { 0, 1 })
+	@PluginVariant(variantLabel = "Stochastic labelled Data Petri net visualisation", requiredParameterLabels = { 0, 1 })
 	public JComponent visualise(final PluginContext context, SLDPN net,
 		ProMCanceller canceller) {
-	return visualise(net.getModel());
+		return createVisualisation(net.getModel());
+	}
+
+	DotPanel createVisualisation(final StochasticLabelledDataPetriNetWeights net) {
+		SLDPNVisualizer<StochasticLabelledDataPetriNetWeights> visualizer = new SLDPNVisualizer<StochasticLabelledDataPetriNetWeights>(net) {
+
+			protected double getTransitionWeight(int a, DataState dataState) {
+				return net.getTransitionWeight(a, dataState);
+			}};
+		return visualizer.visualiseNet();
 	}		
 	
-	public void decoratePlace(StochasticLabelledDataPetriNetWeights net, int place, DotNode dotNode) {
-	}
-
-	public void decorateTransition(StochasticLabelledDataPetriNetWeights net, int transition, DotNode dotNode) {
-		dotNode.setOption("xlabel", net.getWeightFunction(transition).toString() + "");
-	}
-
 }
