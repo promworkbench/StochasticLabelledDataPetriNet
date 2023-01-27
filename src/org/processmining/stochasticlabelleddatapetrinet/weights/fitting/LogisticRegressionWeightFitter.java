@@ -112,9 +112,9 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 				System.out.println(String.format("WeightFitter: Building logistic model from %.0f instances",  wekaInstances.sumOfWeights()));
 				
 				// We need samples for both cases to infer a meaningful function
-				if (wekaInstances.numDistinctValues(0) > 1 || 
-						hasOnlyDistinctAttributes(wekaInstances) || 
-						wekaInstances.numAttributes() == 1) {
+				if (wekaInstances.numDistinctValues(0) > 1 && 
+						!hasOnlyDistinctAttributes(wekaInstances) && 
+						wekaInstances.numAttributes() > 1) {
 					try {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
 						logistic.setMaxIts(1000);
