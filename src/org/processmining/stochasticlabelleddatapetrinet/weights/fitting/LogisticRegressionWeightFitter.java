@@ -112,7 +112,9 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 				System.out.println(String.format("WeightFitter: Building logistic model from %.0f instances",  wekaInstances.sumOfWeights()));
 				
 				// We need samples for both cases to infer a meaningful function
-				if (wekaInstances.numDistinctValues(0) > 1) {
+				if (wekaInstances.numDistinctValues(0) > 1 || 
+						hasOnlyDistinctAttributes(wekaInstances) || 
+						wekaInstances.numAttributes() == 1) {
 					try {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
 						logistic.setMaxIts(1000);
@@ -156,9 +158,15 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 					}
 				} else {
 					int positiveCount = instancesMultimap.get(tIdx+1).size();
-					int negativeCount = instancesMultimap.get(tIdx-1).size();
+					int negativeCount = instancesMultimap.get(-(tIdx+1)).size();
 					double constantWeight = ((double)positiveCount) / (positiveCount + negativeCount);
-					System.out.println("No variables or instances only recorded for one class, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+					if (hasOnlyDistinctAttributes(wekaInstances)) {
+						System.out.println("No variables with more than a single distinct value, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");	
+					} else if (wekaInstances.numAttributes() == 1) {
+						System.out.println("No variables recorded, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+					} else {
+						System.out.println("Instances only recorded for one class, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+					}
 					sldpnWeights.setWeightFunction(tIdx, new ConstantWeightFunction(constantWeight));
 				}
 			}
@@ -168,6 +176,15 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		}
 
 		return sldpnWeights;
+	}
+
+	private boolean hasOnlyDistinctAttributes(Instances wekaInstances) {
+		for (int i = 1; i < wekaInstances.numAttributes(); i++) {
+			if (wekaInstances.numDistinctValues(i) > 1) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Instances getInternalFilteredInstances(Logistic logistic) throws NoSuchFieldException, IllegalAccessException {
