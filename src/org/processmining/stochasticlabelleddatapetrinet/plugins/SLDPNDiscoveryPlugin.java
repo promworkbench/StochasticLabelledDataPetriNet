@@ -25,7 +25,8 @@ public class SLDPNDiscoveryPlugin {
 	@UITopiaVariant(affiliation = IMMiningDialog.affiliation, author = IMMiningDialog.author, email = IMMiningDialog.email)
 	@PluginVariant(variantLabel = "Mine an SLDPN, dialog", requiredParameterLabels = { 0, 1 })
 	public SLDPN mine(UIPluginContext context, AcceptingPetriNet model, XLog xLog) throws Exception {
-		return discover(xLog, model, new SLDPNDiscoveryParametersDefault());
+		SLDPNDiscoveryParametersDefault parameters = new SLDPNDiscoveryParametersDefault();
+		return discover(xLog, model, parameters);
 	}
 
 	/**

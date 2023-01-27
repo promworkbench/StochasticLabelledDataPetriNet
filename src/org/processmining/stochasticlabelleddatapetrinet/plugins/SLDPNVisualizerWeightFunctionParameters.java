@@ -79,7 +79,7 @@ public abstract class SLDPNVisualizerWeightFunctionParameters<T extends Stochast
 			
 			for (int variable: net.getWriteVariables(transition)) {
 				dot.addEdge(dotNode, variable2dotNode.get(variable), "", 
-						Map.of("style", "dotted", "penwidth", "2"));
+						Map.of("style", "invis", "penwidth", "2"));
 			}
 			
 			transition2dotNode.put(transition, dotNode);

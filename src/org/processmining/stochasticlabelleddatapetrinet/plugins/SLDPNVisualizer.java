@@ -129,7 +129,7 @@ public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> 
 			
 			for (int variable: net.getWriteVariables(transition)) {
 				dot.addEdge(dotNode, variable2dotNode.get(variable), "", 
-						Map.of("style", "dotted", "penwidth", "2"));
+						Map.of("style", "invis", "penwidth", "2"));
 			}
 			
 			transition2dotNode.put(transition, dotNode);
@@ -242,12 +242,23 @@ public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> 
 			double weight = getTransitionWeight(entry.getKey(), dataState);
 			Color color = ColorScheme.BLUE_SINGLE_HUE.getColorFromGradient(weight);
 			entry.getValue().setOption("fillcolor", convertColor(color));
-			entry.getValue().setOption("xlabel", String.format("%.2f", weight));
+			entry.getValue().setOption("fontcolor", convertColor(determineFontColor(null, color)));
+			entry.getValue().setOption("xlabel", String.format("<<font color=\"black\">%.2f</font>>", weight));
 		}
 	}
 	
 	private static String convertColor(Color color) {
 		return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
+	}
+	
+	private static final Color determineFontColor(final Color textColor, final Color bgColor) {
+		if (textColor == null) {
+			double val = Math.sqrt(.299 * Math.pow(bgColor.getRed(), 2) + .587 * Math.pow(bgColor.getGreen(), 2)
+					+ .114 * Math.pow(bgColor.getBlue(), 2));
+			return (val < 130) ? Color.WHITE : Color.BLACK;
+		} else {
+			return textColor;
+		}
 	}
 
 	protected abstract double getTransitionWeight(int a, DataState dataState);
