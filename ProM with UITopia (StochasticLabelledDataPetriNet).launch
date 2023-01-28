@@ -23,6 +23,6 @@
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.processmining.contexts.uitopia.UI"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="StochasticLabelledDataPetriNet"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="StochasticLabelledDataPetriNet"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Xmx16G -Djava.library.path=.//lib;.//stdlib -Djava.util.Arrays.useLegacyMergeSort=true -Djava.system.class.loader=org.processmining.framework.util.ProMClassLoader"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Xmx16G -Djava.library.path=./lib/ux64 -Djava.util.Arrays.useLegacyMergeSort=true -Djava.system.class.loader=org.processmining.framework.util.ProMClassLoader"/>
     <stringAttribute key="yk-options" value="&#13;&#10;additional-options=&#13;&#10;snapshots-dir=&#13;&#10;"/>
 </launchConfiguration>
