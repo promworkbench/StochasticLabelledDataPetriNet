@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XLifecycleExtension;
@@ -67,12 +68,12 @@ public class OneHotEncoding {
 		Map<String, Class<?>> categoricalEventAttrs = Maps.filterValues(XUtils.getEventAttributeTypes(log),
 				clazz -> clazz.isAssignableFrom(String.class));
 		List<String> eventAttrLabels = categoricalEventAttrs.keySet().stream()
-				.filter(s -> !excludedAttributes.contains(s)).toList();
+				.filter(s -> !excludedAttributes.contains(s)).collect(Collectors.toList());
 
 		Map<String, Class<?>> categoricalTraceAttrs = Maps.filterValues(XUtils.getTraceAttributeTypes(log),
 				clazz -> clazz.isAssignableFrom(String.class));
 		List<String> traceAttrLabels = categoricalTraceAttrs.keySet().stream()
-				.filter(s -> !excludedAttributes.contains(s)).toList();
+				.filter(s -> !excludedAttributes.contains(s)).collect(Collectors.toList());
 
 		Multimap<String, Object> valueMap = HashMultimap.create();
 

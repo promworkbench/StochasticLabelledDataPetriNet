@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.model.XLog;
@@ -79,7 +80,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 				net);
 
 		// this is guessing a final marking
-		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net); 
+		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net);
 
 		try {
 			// using default alignment
@@ -91,9 +92,9 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 			for (int i = 0; i < net.getNumberOfVariables(); i++) {
 				variableIdx.put(net.getVariableLabel(i), i);
 			}
-			
+
 			// build map of which variable is written where
-			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);			
+			SetMultimap<Integer, String> variablesWritten = buildVariablesWritten(net);
 			// consider all attributes
 			Set<String> attributesConsidered = variableIdx.keySet();
 
@@ -102,32 +103,32 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 			ProjectedLog projectedLog = builder.buildProjectedLog(variablesWritten, attributesConsidered,
 					eventClass2TransitionIdx);
 
-			Map<Integer, Multiset<Map<Integer, Object>>> instancesMultimap = builder.buildInstancesMultimap(projectedLog,
-					eventClass2TransitionIdx);
+			Map<Integer, Multiset<Map<Integer, Object>>> instancesMultimap = builder
+					.buildInstancesMultimap(projectedLog, eventClass2TransitionIdx);
 
 			for (int tIdx = 0; tIdx < net.getNumberOfTransitions(); tIdx++) {
 
 				Instances wekaInstances = builder.buildInstances(tIdx, instancesMultimap);
-				
-				System.out.println(String.format("WeightFitter: Building logistic model from %.0f instances",  wekaInstances.sumOfWeights()));
-				
+
+				System.out.println(String.format("WeightFitter: Building logistic model from %.0f instances",
+						wekaInstances.sumOfWeights()));
+
 				// We need samples for both cases to infer a meaningful function
-				if (wekaInstances.numDistinctValues(0) > 1 && 
-						!hasOnlyDistinctAttributes(wekaInstances) && 
-						wekaInstances.numAttributes() > 1) {
+				if (wekaInstances.numDistinctValues(0) > 1 && !hasOnlyDistinctAttributes(wekaInstances)
+						&& wekaInstances.numAttributes() > 1) {
 					try {
 						Logistic logistic = new weka.classifiers.functions.Logistic();
 						logistic.setMaxIts(1000);
 						logistic.buildClassifier(wekaInstances);
-						
+
 						if (keepEvaluation) {
 							Evaluation eval = new weka.classifiers.evaluation.Evaluation(wekaInstances);
 							eval.evaluateModel(logistic, wekaInstances);
 							evaluations.put(tIdx, eval);
-							System.out.println(String.format("%s (%s): roc: %.4f, prc: %.4f, MAE: %.4f, distribution: %.0f, %.0f", 
-									tIdx, net.getTransitionLabel(tIdx),
-									eval.areaUnderROC(0), eval.areaUnderPRC(0), eval.meanAbsoluteError(), 
-									eval.getClassPriors()[0], eval.getClassPriors()[1]));
+							System.out.println(String.format(
+									"%s (%s): roc: %.4f, prc: %.4f, MAE: %.4f, distribution: %.0f, %.0f", tIdx,
+									net.getTransitionLabel(tIdx), eval.areaUnderROC(0), eval.areaUnderPRC(0),
+									eval.meanAbsoluteError(), eval.getClassPriors()[0], eval.getClassPriors()[1]));
 						}
 
 						double[][] coefficients = logistic.coefficients();
@@ -138,12 +139,12 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 						double[] weightCoeff = new double[net.getNumberOfVariables()];
 
 						Instances internalInstances = getInternalFilteredInstances(logistic);
-						
+
 						// skip class attribute, which is first by convention!
 						for (int i = 1; i < coefficients.length; i++) {
 
 							assert coefficients[i].length == 1 : "We expect coefficients to be scalars";
-							
+
 							assert internalInstances.classIndex() == 0;
 
 							Attribute attr = internalInstances.attribute(i);
@@ -157,15 +158,23 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 						throw new WeightFitterException(e1);
 					}
 				} else {
-					int positiveCount = instancesMultimap.get(tIdx+1).size();
-					int negativeCount = instancesMultimap.get(-(tIdx+1)).size();
-					double constantWeight = ((double)positiveCount) / (positiveCount + negativeCount);
+					int positiveCount = instancesMultimap.get(tIdx + 1).size();
+					int negativeCount = instancesMultimap.get(-(tIdx + 1)).size();
+					double constantWeight = ((double) positiveCount) / (positiveCount + negativeCount);
 					if (hasOnlyDistinctAttributes(wekaInstances)) {
-						System.out.println("No variables with more than a single distinct value, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");	
+						System.out.println(
+								"No variables with more than a single distinct value, no fitting possible! Taking the support "
+										+ positiveCount + "/ (" + positiveCount + " + " + negativeCount + ") = "
+										+ constantWeight + " of the transiton as weight");
 					} else if (wekaInstances.numAttributes() == 1) {
-						System.out.println("No variables recorded, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+						System.out.println("No variables recorded, no fitting possible! Taking the support "
+								+ positiveCount + "/ (" + positiveCount + " + " + negativeCount + ") = "
+								+ constantWeight + " of the transiton as weight");
 					} else {
-						System.out.println("Instances only recorded for one class, no fitting possible! Taking the support "+ positiveCount+"/ ("+positiveCount +" + "+ negativeCount + ") = "+constantWeight+" of the transiton as weight");
+						System.out.println(
+								"Instances only recorded for one class, no fitting possible! Taking the support "
+										+ positiveCount + "/ (" + positiveCount + " + " + negativeCount + ") = "
+										+ constantWeight + " of the transiton as weight");
 					}
 					sldpnWeights.setWeightFunction(tIdx, new ConstantWeightFunction(constantWeight));
 				}
@@ -187,7 +196,8 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		return true;
 	}
 
-	private Instances getInternalFilteredInstances(Logistic logistic) throws NoSuchFieldException, IllegalAccessException {
+	private Instances getInternalFilteredInstances(Logistic logistic)
+			throws NoSuchFieldException, IllegalAccessException {
 		// This is not expose by WEKA but we need it as we need to know the mapping from coefficient to variables/attributes
 		Field f = Logistic.class.getDeclaredField("m_structure");
 		f.setAccessible(true);
@@ -223,8 +233,8 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 		SetMultimap<Integer, String> variablesWritten = SetMultimapBuilder.hashKeys().hashSetValues().build();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
 			int[] variablesWrittenIdx = net.getWriteVariables(i);
-			variablesWritten.putAll(i,
-					Arrays.stream(variablesWrittenIdx).mapToObj((int varIdx) -> net.getVariableLabel(varIdx)).toList());
+			variablesWritten.putAll(i, Arrays.stream(variablesWrittenIdx)
+					.mapToObj((int varIdx) -> net.getVariableLabel(varIdx)).collect(Collectors.toList()));
 		}
 		return variablesWritten;
 	}
