@@ -24,23 +24,23 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 
 	public LogisticWeightFunction(double intercept, double[] coefficients) {
 		super();
-		this.coefficients = coefficients;
-		this.intercept = intercept;
+		this.setCoefficients(coefficients);
+		this.setIntercept(intercept);
 	}
 
 	public double evaluateWeight(StochasticLabelledDataPetriNet net, DataState dataState) {
-		if (coefficients.length != dataState.capacity()) {
+		if (getCoefficients().length != dataState.capacity()) {
 			throw new IllegalArgumentException("Mismatch between DataState and learned coefficients. Expecting "
-					+ coefficients.length + " variables but received " + dataState.capacity());
+					+ getCoefficients().length + " variables but received " + dataState.capacity());
 		}
 
-		double weight = intercept;
+		double weight = getIntercept();
 		for (int i = 0; i < dataState.capacity(); i++) {
 			if (dataState.contains(i)) {
 				if (net.getVariableType(i) == VariableType.DISCRETE) {
-					weight += dataState.getLong(i) * coefficients[i];
+					weight += dataState.getLong(i) * getCoefficients()[i];
 				} else {
-					weight += dataState.getDouble(i) * coefficients[i];	
+					weight += dataState.getDouble(i) * getCoefficients()[i];	
 				}				
 			} else {
 				// We are ignoring the missing variable 
@@ -56,28 +56,28 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 	public void serialize(OutputStream os) throws IOException {
 		DataOutputStream dos = new DataOutputStream(os);
 		dos.writeInt(0); // version reserved
-		dos.writeDouble(intercept);
-		dos.writeInt(coefficients.length);
-		for (int i = 0; i < coefficients.length; i++) {
-			dos.writeDouble(coefficients[i]);
+		dos.writeDouble(getIntercept());
+		dos.writeInt(getCoefficients().length);
+		for (int i = 0; i < getCoefficients().length; i++) {
+			dos.writeDouble(getCoefficients()[i]);
 		}
 	}
 
 	public void deserialize(InputStream is) throws IOException {
 		DataInputStream dis = new DataInputStream(is);
 		dis.readInt();
-		intercept = dis.readDouble();
-		coefficients = new double[dis.readInt()];
-		for (int i = 0; i < coefficients.length; i++) {
-			coefficients[i] = dis.readDouble();
+		setIntercept(dis.readDouble());
+		setCoefficients(new double[dis.readInt()]);
+		for (int i = 0; i < getCoefficients().length; i++) {
+			getCoefficients()[i] = dis.readDouble();
 		}
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(coefficients);
-		result = prime * result + Objects.hash(intercept);
+		result = prime * result + Arrays.hashCode(getCoefficients());
+		result = prime * result + Objects.hash(getIntercept());
 		return result;
 	}
 
@@ -89,22 +89,38 @@ public class LogisticWeightFunction implements SerializableWeightFunction {
 		if (getClass() != obj.getClass())
 			return false;
 		LogisticWeightFunction other = (LogisticWeightFunction) obj;
-		return Arrays.equals(coefficients, other.coefficients)
-				&& Double.doubleToLongBits(intercept) == Double.doubleToLongBits(other.intercept);
+		return Arrays.equals(getCoefficients(), other.getCoefficients())
+				&& Double.doubleToLongBits(getIntercept()) == Double.doubleToLongBits(other.getIntercept());
 	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format(Locale.ENGLISH, "%.3f+[", intercept));		
-		for (int i = 0; i < coefficients.length; i++) {
-			double d = coefficients[i];
+		sb.append(String.format(Locale.ENGLISH, "%.3f+[", getIntercept()));		
+		for (int i = 0; i < getCoefficients().length; i++) {
+			double d = getCoefficients()[i];
 			sb.append(String.format(Locale.ENGLISH, "%.3f", d));
-			if (i < coefficients.length-1) {
+			if (i < getCoefficients().length-1) {
 				sb.append(",");
 			}
 		}
 		sb.append("]");
 		return sb.toString();
+	}
+
+	public double[] getCoefficients() {
+		return coefficients;
+	}
+
+	public void setCoefficients(double[] coefficients) {
+		this.coefficients = coefficients;
+	}
+
+	public double getIntercept() {
+		return intercept;
+	}
+
+	public void setIntercept(double intercept) {
+		this.intercept = intercept;
 	}
 	
 }
