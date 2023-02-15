@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.model.XLog;
@@ -72,7 +73,7 @@ public class ObservationInstanceBuilderTest {
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
 			int[] variablesWrittenIdx = net.getWriteVariables(i);			
 			variablesWritten.putAll(i, 
-					Arrays.stream(variablesWrittenIdx).mapToObj((int varIdx) -> net.getVariableLabel(varIdx)).toList());
+					Arrays.stream(variablesWrittenIdx).mapToObj((int varIdx) -> net.getVariableLabel(varIdx)).collect(Collectors.toList()));
 		}
 		Set<String> attributesConsidered = Set.copyOf(variablesWritten.values());
 			
