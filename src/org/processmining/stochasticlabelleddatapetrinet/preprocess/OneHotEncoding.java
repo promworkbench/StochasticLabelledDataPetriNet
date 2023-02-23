@@ -165,5 +165,13 @@ public class OneHotEncoding {
 		XUtils.putAttributes(a, numericAttributesForBoolean);
 
 	}
+	
+	public Set<String> getVariables() {
+		return encoding.keySet();
+	}
+
+	public Map<Object, String> getMapping(String variable) {
+		return encoding.get(variable);
+	}
 
 }
