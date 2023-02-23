@@ -55,7 +55,7 @@ public class SLDPNCSVExportPlugin {
 						
 						double[] coeff = lwf.getCoefficients();
 						for (int i = 0; i < coeff.length; i++) {
-							weights[1+i] = String.valueOf(coeff[i]);
+							weights[2+i] = String.valueOf(coeff[i]);
 						}
 						
 					} else {
