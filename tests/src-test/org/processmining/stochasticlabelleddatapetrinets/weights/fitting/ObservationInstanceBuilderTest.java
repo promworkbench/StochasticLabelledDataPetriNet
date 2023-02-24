@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +31,9 @@ import org.processmining.stochasticlabelleddatapetrinets.SimpleTestLog;
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multiset;
@@ -59,7 +61,7 @@ public class ObservationInstanceBuilderTest {
 		
 		PetrinetMarkedWithMappings markedPN = PetrinetConverter.viewAsPetrinet(net);					
 		
-		Marking[] finalMarkings = List.of(PetrinetUtils.guessFinalMarking(markedPN.getNet())).toArray(new Marking[1]);
+		Marking[] finalMarkings = ImmutableList.of(PetrinetUtils.guessFinalMarking(markedPN.getNet())).toArray(new Marking[1]);
 		BalancedProcessorConfiguration config = BalancedProcessorConfiguration.newDefaultInstance(
 				markedPN.getNet(), markedPN.getInitialMarking(), finalMarkings, 
 				log, new XEventNameClassifier(),
@@ -75,7 +77,7 @@ public class ObservationInstanceBuilderTest {
 			variablesWritten.putAll(i, 
 					Arrays.stream(variablesWrittenIdx).mapToObj((int varIdx) -> net.getVariableLabel(varIdx)).collect(Collectors.toList()));
 		}
-		Set<String> attributesConsidered = Set.copyOf(variablesWritten.values());
+		Set<String> attributesConsidered = ImmutableSet.copyOf(variablesWritten.values());
 			
 		Map<String, Integer> eventClass2TransitionIdx = new HashMap<>();
 		for (int i = 0; i < net.getNumberOfTransitions(); i++) {
@@ -83,7 +85,7 @@ public class ObservationInstanceBuilderTest {
 		}
 		
 		
-		Map<String, Object> initialValues = Map.of();
+		Map<String, Object> initialValues = ImmutableMap.of();
 		Map<String, Class<?>> variableClasses = new HashMap<>();
 		Map<String, VariableType> variableTypes = new HashMap<>();
 
@@ -116,9 +118,9 @@ public class ObservationInstanceBuilderTest {
 		System.out.println(instances);
 		
 		assertEquals(10, instances.get(2).size()); // B was seen 10 times
-		assertEquals(10, instances.get(2).count(Map.of(0, 10.0))); // B was seen 10 times with X = 10
-		assertEquals(20, instances.get(-2).count(Map.of(0, 5.0))); // non-B was seen 20 times with X = 5
-		assertEquals(0, instances.get(-2).count(Map.of(0, 10.0))); // non-B never saw X = 10
+		assertEquals(10, instances.get(2).count(ImmutableMap.of(0, 10.0))); // B was seen 10 times with X = 10
+		assertEquals(20, instances.get(-2).count(ImmutableMap.of(0, 5.0))); // non-B was seen 20 times with X = 5
+		assertEquals(0, instances.get(-2).count(ImmutableMap.of(0, 10.0))); // non-B never saw X = 10
 		
 		Instances wekaInstances = builder.buildInstances(1, instances);
 		

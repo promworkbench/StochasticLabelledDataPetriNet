@@ -10,11 +10,13 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.ConstantWeightFu
 import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNet;
 
+import com.google.common.collect.ImmutableList;
+
 public class StochasticLabelledDataPetriNetWeightsDataIndependent extends StochasticLabelledDataPetriNetImpl
 		implements StochasticLabelledDataPetriNetWeights {
 
 	public StochasticLabelledDataPetriNetWeightsDataIndependent(StochasticLabelledPetriNet slpn) {
-		super(slpn, List.of(), List.of(), 
+		super(slpn, ImmutableList.of(), ImmutableList.of(), 
 			  emptyListOfLists(slpn.getNumberOfTransitions()), emptyListOfLists(slpn.getNumberOfTransitions()));
 	}
 

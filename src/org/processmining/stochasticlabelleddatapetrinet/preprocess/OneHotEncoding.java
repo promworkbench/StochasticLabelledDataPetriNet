@@ -28,12 +28,13 @@ import org.deckfour.xes.model.XTrace;
 import org.processmining.log.utils.XUtils;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 public class OneHotEncoding {
 
-	private static final Set<String> STANDARD_EXCLUDED_ATTRIBUTES = Set.of(XConceptExtension.KEY_NAME,
+	private static final Set<String> STANDARD_EXCLUDED_ATTRIBUTES = ImmutableSet.of(XConceptExtension.KEY_NAME,
 			XConceptExtension.KEY_INSTANCE, XTimeExtension.KEY_TIMESTAMP, XLifecycleExtension.KEY_MODEL,
 			XLifecycleExtension.KEY_TRANSITION);
 
@@ -50,7 +51,15 @@ public class OneHotEncoding {
 	}
 
 	public OneHotEncoding(int maxCategories, String... excludedAttributes) {
-		this(new HashSet<String>(List.of(excludedAttributes)), maxCategories);
+		this(createHashSet(excludedAttributes), maxCategories);
+	}
+
+	private static Set<String> createHashSet(String[] excludedAttributes) {
+		HashSet<String> set = new HashSet<String>();
+		for (String attr: excludedAttributes) {
+			set.add(attr);			
+		}
+		return set;
 	}
 
 	public OneHotEncoding(Set<String> excludedAttributes, int maxCategories) {

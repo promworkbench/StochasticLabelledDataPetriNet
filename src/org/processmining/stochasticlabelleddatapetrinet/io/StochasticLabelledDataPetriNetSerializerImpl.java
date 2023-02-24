@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
@@ -25,6 +24,7 @@ import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetS
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
 
 public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticLabelledDataPetriNetSerializer {
 
@@ -34,7 +34,7 @@ public class StochasticLabelledDataPetriNetSerializerImpl implements StochasticL
 	private static final int EOF = Integer.MAX_VALUE;
 
 	private static BiMap<Class<? extends SerializableWeightFunction>, Integer> WEIGHT_FUNCTIONS = 
-			HashBiMap.create(Map.of(
+			HashBiMap.create(ImmutableMap.of(
 					ConstantWeightFunction.class, 1, 
 					DirectDataWeightFunction.class, 2,
 					LinearWeightFunction.class, 3, 

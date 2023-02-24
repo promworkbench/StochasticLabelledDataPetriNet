@@ -25,12 +25,13 @@ import org.processmining.stochasticlabelleddatapetrinet.logadapter.SLDPNReplayUt
 import org.python.google.common.collect.Sets;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 public class AllWriteOperationMiner implements WriteOperationMiner {
 
-	private static final Set<String> STANDARD_EXCLUDED_ATTRIBUTES = Set.of(XConceptExtension.KEY_NAME,
+	private static final Set<String> STANDARD_EXCLUDED_ATTRIBUTES = ImmutableSet.of(XConceptExtension.KEY_NAME,
 			XConceptExtension.KEY_INSTANCE, XTimeExtension.KEY_TIMESTAMP, XLifecycleExtension.KEY_MODEL,
 			XLifecycleExtension.KEY_TRANSITION);
 

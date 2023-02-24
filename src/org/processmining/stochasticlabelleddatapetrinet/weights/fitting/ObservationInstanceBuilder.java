@@ -23,6 +23,7 @@ import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignmentMov
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
@@ -311,7 +312,7 @@ public class ObservationInstanceBuilder {
 		ArrayList<Attribute> attributeList = new ArrayList<>(variableTypeMap.size() + 1);
 
 		// positive and negative class
-		attributeList.add(new Attribute("class", List.of("1", "0")));
+		attributeList.add(new Attribute("class", ImmutableList.of("1", "0")));
 				
 		for (Entry<String, VariableType> entry : variableTypeMap.entrySet()) {
 			Attribute attr = createAttribute(entry);

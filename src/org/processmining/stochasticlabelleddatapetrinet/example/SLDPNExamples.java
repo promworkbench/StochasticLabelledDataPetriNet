@@ -10,6 +10,8 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.SimpleLinearWeig
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsEditable;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsImpl;
 
+import com.google.common.collect.ImmutableList;
+
 public final class SLDPNExamples {
 	
 	private SLDPNExamples() {
@@ -21,12 +23,12 @@ public final class SLDPNExamples {
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildABCChoiceSLPN();
 		
 		// Add variable		
-		List<String> varLabels = List.of("X");
-		List<VariableType> varTypes = List.of(VariableType.CONTINUOUS);
+		List<String> varLabels = ImmutableList.of("X");
+		List<VariableType> varTypes = ImmutableList.of(VariableType.CONTINUOUS);
 		
 		// Let A write and B and C read
-		List<int[]> transRead = List.of(new int[] { }, new int[] { 0 }, new int[] { 0 });
-		List<int[]> transWrite =  List.of(new int[] { 0 }, new int[] { }, new int[] { });
+		List<int[]> transRead = ImmutableList.of(new int[] { }, new int[] { 0 }, new int[] { 0 });
+		List<int[]> transWrite =  ImmutableList.of(new int[] { 0 }, new int[] { }, new int[] { });
 		
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(slpn, varLabels, varTypes, transRead, transWrite);
 		

@@ -3,7 +3,6 @@ package org.processmining.stochasticlabelleddatapetrinet.weights.fitting;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +27,8 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.LogisticWeightFu
 import org.processmining.xesalignmentextension.XAlignmentExtension;
 import org.processmining.xesalignmentextension.XAlignmentExtension.XAlignment;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
@@ -216,7 +217,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 	private ObservationInstanceBuilder createObservationBuilder(StochasticLabelledDataPetriNet net,
 			Iterable<XAlignment> alignIter) {
-		Map<String, Object> initialValues = Map.of();
+		Map<String, Object> initialValues = ImmutableMap.of();
 		Map<String, Class<?>> variableClasses = new HashMap<>();
 		Map<String, VariableType> variableTypes = new HashMap<>();
 
@@ -251,7 +252,7 @@ public class LogisticRegressionWeightFitter implements WeightFitter {
 
 	protected BalancedProcessorConfiguration configureAlignment(XLog log, PetrinetMarkedWithMappings markedPN) {
 		//TODO let marking be configureable
-		Marking[] finalMarkings = List.of(PetrinetUtils.guessFinalMarking(markedPN.getNet())).toArray(new Marking[1]);
+		Marking[] finalMarkings = ImmutableList.of(PetrinetUtils.guessFinalMarking(markedPN.getNet())).toArray(new Marking[1]);
 		return BalancedProcessorConfiguration.newDefaultInstance(markedPN.getNet(), markedPN.getInitialMarking(),
 				finalMarkings, log, classifier, defaultMoveOnModelCost, defaultMoveOnLogCost, defaultMissingWriteOpCost,
 				defaultIncorrectWriteOpCost);

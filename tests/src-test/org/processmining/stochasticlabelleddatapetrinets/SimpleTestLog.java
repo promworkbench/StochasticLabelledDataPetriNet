@@ -12,6 +12,8 @@ import org.processmining.stochasticlabelleddatapetrinet.weights.DirectDataWeight
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsEditable;
 import org.processmining.stochasticlabelledpetrinets.StochasticLabelledPetriNetSimpleWeightsImpl;
 
+import com.google.common.collect.ImmutableList;
+
 public class SimpleTestLog {
 
 	public static XLog buildTestLog() {
@@ -136,10 +138,10 @@ public class SimpleTestLog {
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 
 		// Add variable		
-		List<String> varLabels = List.of("X");
-		List<VariableType> varTypes = List.of(VariableType.CONTINUOUS);
-		List<int[]> transRead = List.of(new int[] {}, new int[] { 0 }, new int[] { 0 });
-		List<int[]> transWrite = List.of(new int[] { 0 }, new int[] {}, new int[] {});
+		List<String> varLabels = ImmutableList.of("X");
+		List<VariableType> varTypes = ImmutableList.of(VariableType.CONTINUOUS);
+		List<int[]> transRead = ImmutableList.of(new int[] {}, new int[] { 0 }, new int[] { 0 });
+		List<int[]> transWrite = ImmutableList.of(new int[] { 0 }, new int[] {}, new int[] {});
 
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(
 				slpn, varLabels, varTypes, transRead, transWrite);
@@ -161,10 +163,10 @@ public class SimpleTestLog {
 		StochasticLabelledPetriNetSimpleWeightsEditable slpn = buildSLPN();
 
 		// Add variable		
-		List<String> varLabels = List.of("X", "Y");
-		List<VariableType> varTypes = List.of(VariableType.CONTINUOUS, VariableType.CONTINUOUS);
-		List<int[]> transRead = List.of(new int[] {}, new int[] { 0, 1 }, new int[] { 0, 1 });
-		List<int[]> transWrite = List.of(new int[] { 0, 1 }, new int[] {}, new int[] {});
+		List<String> varLabels = ImmutableList.of("X", "Y");
+		List<VariableType> varTypes = ImmutableList.of(VariableType.CONTINUOUS, VariableType.CONTINUOUS);
+		List<int[]> transRead = ImmutableList.of(new int[] {}, new int[] { 0, 1 }, new int[] { 0, 1 });
+		List<int[]> transWrite = ImmutableList.of(new int[] { 0, 1 }, new int[] {}, new int[] {});
 
 		StochasticLabelledDataPetriNetWeightsDataDependent sldpn = new StochasticLabelledDataPetriNetWeightsDataDependent(
 				slpn, varLabels, varTypes, transRead, transWrite);

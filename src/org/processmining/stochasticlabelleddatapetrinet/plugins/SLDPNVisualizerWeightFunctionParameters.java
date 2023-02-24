@@ -8,6 +8,8 @@ import org.processmining.plugins.graphviz.dot.DotNode;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet;
 
+import com.google.common.collect.ImmutableMap;
+
 public abstract class SLDPNVisualizerWeightFunctionParameters<T extends StochasticLabelledDataPetriNet> {
 	
 	private T net;
@@ -79,7 +81,7 @@ public abstract class SLDPNVisualizerWeightFunctionParameters<T extends Stochast
 			
 			for (int variable: net.getWriteVariables(transition)) {
 				dot.addEdge(dotNode, variable2dotNode.get(variable), "", 
-						Map.of("style", "invis", "penwidth", "2"));
+						ImmutableMap.of("style", "invis", "penwidth", "2"));
 			}
 			
 			transition2dotNode.put(transition, dotNode);

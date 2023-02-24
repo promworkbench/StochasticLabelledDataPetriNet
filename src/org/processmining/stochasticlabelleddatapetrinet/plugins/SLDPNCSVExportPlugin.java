@@ -9,7 +9,6 @@ import org.processmining.contexts.uitopia.annotations.UIExportPlugin;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNetWeights;
-import org.processmining.stochasticlabelleddatapetrinet.preprocess.OneHotEncoding;
 import org.processmining.stochasticlabelleddatapetrinet.weights.LogisticWeightFunction;
 import org.processmining.stochasticlabelleddatapetrinet.weights.WeightFunction;
 
@@ -28,7 +27,6 @@ public class SLDPNCSVExportPlugin {
 			try (CSVWriter writer = new CSVWriter(fw)) {
 	
 				StochasticLabelledDataPetriNetWeights model = net.getModel();
-				OneHotEncoding ohe = net.getOneHotEncoding();
 				
 				String[] header = new String[2 + model.getNumberOfVariables()];
 				header[0] = "transition";

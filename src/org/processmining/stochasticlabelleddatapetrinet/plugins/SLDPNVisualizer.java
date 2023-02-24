@@ -22,6 +22,7 @@ import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPe
 import org.processmining.stochasticlabelleddatapetrinet.StochasticLabelledDataPetriNet.VariableType;
 import org.processmining.stochasticlabelleddatapetrinet.datastate.DataState;
 
+import com.google.common.collect.ImmutableMap;
 import com.kitfox.svg.SVGDiagram;
 
 public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> {
@@ -129,7 +130,7 @@ public abstract class SLDPNVisualizer<T extends StochasticLabelledDataPetriNet> 
 			
 			for (int variable: net.getWriteVariables(transition)) {
 				dot.addEdge(dotNode, variable2dotNode.get(variable), "", 
-						Map.of("style", "invis", "penwidth", "2"));
+						ImmutableMap.of("style", "invis", "penwidth", "2"));
 			}
 			
 			transition2dotNode.put(transition, dotNode);
