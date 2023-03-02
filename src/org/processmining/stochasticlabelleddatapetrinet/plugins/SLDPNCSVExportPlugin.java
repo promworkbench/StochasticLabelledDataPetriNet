@@ -32,7 +32,7 @@ public class SLDPNCSVExportPlugin {
 				header[0] = "transition";
 				header[1] = "intercept";
 				for (int i = 0; i < model.getNumberOfVariables(); i++) {
-					header[1+i] = model.getVariableLabel(i);
+					header[2+i] = model.getVariableLabel(i);
 				}
 				writer.writeNext(header);
 				
