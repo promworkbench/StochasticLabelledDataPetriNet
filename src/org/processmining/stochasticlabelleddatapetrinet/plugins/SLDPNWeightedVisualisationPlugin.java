@@ -56,7 +56,33 @@ public class SLDPNWeightedVisualisationPlugin  {
 			} };
 
 		return visualizer.visualiseNet();
-	}	
+	}
+	
+	@Plugin(
+			name = "(Prettier) Stochastic labelled Data "
+					+ "Petri net (SLDPN) - weight function",
+			returnLabels = {"Dot visualization" }, 
+			returnTypes = { JComponent.class }, 
+			parameterLabels = {	"SLDPN", "canceller" }, 
+			userAccessible = true, 
+			level = PluginLevel.Regular)
+	@Visualizer
+	@UITopiaVariant(
+			affiliation = "QUT", 
+			author = "Adam Banham", 
+			email = "adam_banham@hotmail.com")
+	@PluginVariant(
+			variantLabel = "(Prettier) "
+					+ "Stochastic labelled Data Petri net visualisation",
+			requiredParameterLabels = { 0, 1 }
+	)
+	public JComponent visualisePrettierWeightFunction(
+			final PluginContext context, SLDPN net,
+			ProMCanceller canceller) {
+		return SLDPNStaticPettierVisualizer.visualise(net);
+	}
+	
+	
 
 	
 }
